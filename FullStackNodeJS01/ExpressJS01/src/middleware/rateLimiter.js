@@ -1,7 +1,7 @@
 const rateLimit = require("express-rate-limit");
 
 const registerLimiter = rateLimit({
-    windowMs: 15 * 60 * 1000, // 15 phút
+    windowMs: 15 * 60 * 1000,
     max: 5,
     standardHeaders: true,
     legacyHeaders: false,
@@ -13,7 +13,7 @@ const registerLimiter = rateLimit({
 });
 
 const loginLimiter = rateLimit({
-    windowMs: 15 * 60 * 1000, // 15 phút
+    windowMs: 15 * 60 * 1000,
     max: 10,
     standardHeaders: true,
     legacyHeaders: false,
@@ -24,7 +24,7 @@ const loginLimiter = rateLimit({
 });
 
 const otpLimiter = rateLimit({
-    windowMs: 10 * 60 * 1000, // 10 phút
+    windowMs: 10 * 60 * 1000,
     max: 3,
     standardHeaders: true,
     legacyHeaders: false,

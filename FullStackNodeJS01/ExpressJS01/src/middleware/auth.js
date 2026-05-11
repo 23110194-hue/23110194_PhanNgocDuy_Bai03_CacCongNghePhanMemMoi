@@ -3,9 +3,6 @@ const jwt = require("jsonwebtoken");
 
 const WHITE_LIST = ["/", "/register", "/login", "/verify-register", "/forgot-password", "/verify-forgot-password"];
 
-// ============================================================
-// Middleware xác thực JWT
-// ============================================================
 const auth = (req, res, next) => {
     if (WHITE_LIST.find(item => '/v1/api' + item === req.originalUrl)) {
         return next();
@@ -29,9 +26,6 @@ const auth = (req, res, next) => {
     }
 };
 
-// ============================================================
-// Middleware phân quyền theo role
-// ============================================================
 const authorizeRole = (...roles) => {
     return (req, res, next) => {
         if (!req.user) {

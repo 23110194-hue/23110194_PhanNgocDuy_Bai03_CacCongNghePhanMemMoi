@@ -11,7 +11,7 @@ function App() {
   useEffect(() => {
     const fetchAccount = async () => {
       setAppLoading(true);
-      const res = await axios.get(`/v1/api/account`); // API kiểm tra token
+      const res = await axios.get(`/v1/api/account`);
       if (res && !res.message) {
         setAuth({
           isAuthenticated: true,
@@ -41,7 +41,7 @@ function App() {
       ) : (
         <>
           <Header />
-          <Outlet /> {/* Nơi các trang con như Home, User sẽ hiển thị */}
+          <Outlet />
         </>
       )}
     </div>

@@ -17,11 +17,10 @@ const otpSchema = new mongoose.Schema({
     createdAt: {
         type: Date,
         default: Date.now,
-        expires: 300, // TTL: tự động xóa sau 5 phút (300 giây)
+        expires: 300,
     },
 });
 
-// Index đảm bảo mỗi email + type chỉ có 1 OTP active
 otpSchema.index({ email: 1, type: 1 }, { unique: true });
 
 const OTP = mongoose.model('otp', otpSchema);

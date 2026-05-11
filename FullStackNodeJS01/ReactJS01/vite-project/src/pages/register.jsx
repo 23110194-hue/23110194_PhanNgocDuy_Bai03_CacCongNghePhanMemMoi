@@ -21,7 +21,6 @@ const RegisterPage = () => {
     const [loading, setLoading] = useState(false);
     const [resendLoading, setResendLoading] = useState(false);
 
-    // Bước 1: Đăng ký → gửi OTP
     const onRegisterFinish = async (values) => {
         const { name, email, password } = values;
         setLoading(true);
@@ -43,7 +42,6 @@ const RegisterPage = () => {
         }
     };
 
-    // Bước 2: Xác nhận OTP
     const onVerifyOTPFinish = async (values) => {
         const { otp } = values;
         setLoading(true);
@@ -64,7 +62,6 @@ const RegisterPage = () => {
         }
     };
 
-    // Gửi lại OTP
     const handleResendOTP = async () => {
         setResendLoading(true);
         const currentValues = form.getFieldsValue();
@@ -99,7 +96,6 @@ const RegisterPage = () => {
                         <Step title="Hoàn tất" icon={<CheckCircleOutlined />} />
                     </Steps>
 
-                    {/* ── Bước 1: Thông tin đăng ký ── */}
                     {currentStep === 0 && (
                         <Form form={form} name="register" onFinish={onRegisterFinish} layout="vertical">
                             <Form.Item
@@ -183,7 +179,6 @@ const RegisterPage = () => {
                         </Form>
                     )}
 
-                    {/* ── Bước 2: Nhập OTP ── */}
                     {currentStep === 1 && (
                         <div>
                             <div style={{

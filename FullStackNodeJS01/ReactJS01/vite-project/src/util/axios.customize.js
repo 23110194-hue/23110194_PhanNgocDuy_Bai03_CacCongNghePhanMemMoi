@@ -4,7 +4,6 @@ const instance = axios.create({
     baseURL: import.meta.env.VITE_BACKEND_URL
 });
 
-// Gắn Token vào đầu mỗi yêu cầu gửi đi
 instance.interceptors.request.use(function (config) {
     config.headers.Authorization = `Bearer ${localStorage.getItem("access_token")}`;
     return config;
@@ -12,7 +11,6 @@ instance.interceptors.request.use(function (config) {
     return Promise.reject(error);
 });
 
-// Xử lý dữ liệu trả về để code gọn hơn
 instance.interceptors.response.use(function (response) {
     if (response && response.data) return response.data;
     return response;

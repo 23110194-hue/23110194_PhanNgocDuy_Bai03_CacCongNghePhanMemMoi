@@ -20,7 +20,6 @@ const ForgotPasswordPage = () => {
     const [loading, setLoading] = useState(false);
     const [resendLoading, setResendLoading] = useState(false);
 
-    // Bước 1: Gửi OTP qua email
     const onSendOTPFinish = async (values) => {
         setLoading(true);
         const res = await sendForgotPasswordOTPApi(values.email);
@@ -41,7 +40,6 @@ const ForgotPasswordPage = () => {
         }
     };
 
-    // Bước 2: Xác thực OTP + đặt mật khẩu mới
     const onResetPasswordFinish = async (values) => {
         const { otp, newPassword } = values;
         setLoading(true);
@@ -62,7 +60,6 @@ const ForgotPasswordPage = () => {
         }
     };
 
-    // Gửi lại OTP
     const handleResendOTP = async () => {
         setResendLoading(true);
         const res = await sendForgotPasswordOTPApi(forgotEmail);
@@ -96,7 +93,6 @@ const ForgotPasswordPage = () => {
                         <Step title="Hoàn tất" icon={<CheckCircleOutlined />} />
                     </Steps>
 
-                    {/* ── Bước 1: Nhập email ── */}
                     {currentStep === 0 && (
                         <Form form={emailForm} name="forgot-step1" onFinish={onSendOTPFinish} layout="vertical">
                             <p style={{ color: "#666", marginBottom: 16 }}>
@@ -130,7 +126,6 @@ const ForgotPasswordPage = () => {
                         </Form>
                     )}
 
-                    {/* ── Bước 2: Nhập OTP + mật khẩu mới ── */}
                     {currentStep === 1 && (
                         <div>
                             <div style={{

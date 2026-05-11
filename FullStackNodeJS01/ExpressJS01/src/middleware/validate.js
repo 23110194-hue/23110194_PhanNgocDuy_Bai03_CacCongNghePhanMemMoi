@@ -1,6 +1,5 @@
 const { body, validationResult } = require("express-validator");
 
-// Helper: trả về lỗi đầu tiên nếu có
 const handleValidationErrors = (req, res, next) => {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {

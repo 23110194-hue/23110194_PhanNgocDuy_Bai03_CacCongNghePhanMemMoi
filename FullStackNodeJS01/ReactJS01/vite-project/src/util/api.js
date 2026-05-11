@@ -1,7 +1,5 @@
 import axios from './axios.customize';
 
-// ── Auth APIs ────────────────────────────────────────────────
-
 const createUserApi = (name, email, password) =>
     axios.post("/v1/api/register", { name, email, password });
 
@@ -16,8 +14,6 @@ const sendForgotPasswordOTPApi = (email) =>
 
 const verifyForgotPasswordOTPApi = (email, otp, newPassword) =>
     axios.post("/v1/api/verify-forgot-password", { email, otp, newPassword });
-
-// ── User APIs ────────────────────────────────────────────────
 
 const getUserApi = () =>
     axios.get("/v1/api/user");

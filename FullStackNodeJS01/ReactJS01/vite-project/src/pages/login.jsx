@@ -33,10 +33,8 @@ const LoginPage = () => {
                 message: "Đăng nhập thành công! 🎉",
                 description: `Chào mừng trở lại, ${res?.user?.name || res?.user?.email}!`,
             });
-            // Điều hướng theo role
             navigate(res.redirectUrl || "/");
         } else if (res && res.EC === 3) {
-            // Tài khoản chưa kích hoạt
             notification.warning({
                 message: "Tài khoản chưa kích hoạt",
                 description: res.EM,

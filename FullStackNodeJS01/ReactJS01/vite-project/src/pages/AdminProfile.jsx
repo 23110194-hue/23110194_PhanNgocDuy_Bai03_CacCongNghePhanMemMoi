@@ -42,7 +42,6 @@ const AdminProfile = () => {
                         }}
                         bodyStyle={{ padding: 0 }}
                     >
-                        {/* Header */}
                         <div style={{
                             background: "linear-gradient(135deg, #ea580c 0%, #dc2626 100%)",
                             padding: "40px 30px",
@@ -62,7 +61,6 @@ const AdminProfile = () => {
                             </Tag>
                         </div>
 
-                        {/* Body */}
                         <div style={{ padding: "24px 30px" }}>
                             <div style={{
                                 display: "flex", alignItems: "center", gap: 12,

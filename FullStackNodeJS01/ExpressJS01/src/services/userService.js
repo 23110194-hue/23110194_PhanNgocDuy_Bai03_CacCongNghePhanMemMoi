@@ -7,39 +7,28 @@ const crypto = require("crypto");
 const { sendOTPEmail } = require("./emailService");
 const saltRounds = 10;
 
-// ============================================================
-// HELPER: Tạo OTP 6 chữ số
-// ============================================================
 const generateOTP = () => {
     return crypto.randomInt(100000, 999999).toString();
 };
 
-// ============================================================
-// REGISTER: Tạo user (isActive = false) + gửi OTP qua email
-// ============================================================
 const createUserService = async (name, email, password) => {
     try {
-        // Kiểm tra email đã tồn tại và đã kích hoạt
         const existingUser = await User.findOne({ email });
         if (existingUser) {
             if (existingUser.isActive) {
                 return { EC: 1, EM: "Email đã được sử dụng, vui lòng chọn email khác" };
             }
-            // User đã đăng ký nhưng chưa kích hoạt → xóa và cho đăng ký lại
             await User.deleteOne({ email });
         }
 
-        // Xóa OTP cũ nếu có
         await OTP.deleteOne({ email, type: "register" });
 
         const hashPassword = await bcrypt.hash(password, saltRounds);
         await User.create({ name, email, password: hashPassword, role: "user", isActive: false });
 
-        // Tạo và lưu OTP
         const otp = generateOTP();
         await OTP.create({ email, otp, type: "register" });
 
-        // Gửi email OTP
         const emailSent = await sendOTPEmail(email, otp, "register");
         if (!emailSent) {
             return { EC: -1, EM: "Không thể gửi email OTP. Vui lòng kiểm tra lại email hoặc thử lại sau." };
@@ -52,9 +41,6 @@ const createUserService = async (name, email, password) => {
     }
 };
 
-// ============================================================
-// VERIFY REGISTER OTP: Kích hoạt tài khoản
-// ============================================================
 const verifyRegisterOTPService = async (email, otp) => {
     try {
         const otpRecord = await OTP.findOne({ email, type: "register" });
@@ -65,7 +51,6 @@ const verifyRegisterOTPService = async (email, otp) => {
             return { EC: 2, EM: "Mã OTP không chính xác" };
         }
 
-        // Kích hoạt tài khoản
         await User.updateOne({ email }, { isActive: true });
         await OTP.deleteOne({ email, type: "register" });
 
@@ -76,9 +61,6 @@ const verifyRegisterOTPService = async (email, otp) => {
     }
 };
 
-// ============================================================
-// LOGIN: Kiểm tra thông tin + trả về JWT + redirectUrl theo role
-// ============================================================
 const loginService = async (email, password) => {
     try {
         const user = await User.findOne({ email });
@@ -114,9 +96,6 @@ const loginService = async (email, password) => {
     }
 };
 
-// ============================================================
-// FORGOT PASSWORD: Gửi OTP qua email
-// ============================================================
 const sendForgotPasswordOTPService = async (email) => {
     try {
         const user = await User.findOne({ email, isActive: true });
@@ -124,7 +103,6 @@ const sendForgotPasswordOTPService = async (email) => {
             return { EC: 1, EM: "Email không tồn tại hoặc tài khoản chưa được kích hoạt" };
         }
 
-        // Xóa OTP cũ nếu có
         await OTP.deleteOne({ email, type: "forgot-password" });
 
         const otp = generateOTP();
@@ -142,9 +120,6 @@ const sendForgotPasswordOTPService = async (email) => {
     }
 };
 
-// ============================================================
-// VERIFY FORGOT PASSWORD OTP: Đặt lại mật khẩu
-// ============================================================
 const verifyForgotPasswordOTPService = async (email, otp, newPassword) => {
     try {
         const otpRecord = await OTP.findOne({ email, type: "forgot-password" });
@@ -166,9 +141,6 @@ const verifyForgotPasswordOTPService = async (email, otp, newPassword) => {
     }
 };
 
-// ============================================================
-// GET ALL USERS (giữ nguyên)
-// ============================================================
 const getUserService = async () => {
     try {
         return await User.find({}).select("-password");
