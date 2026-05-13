@@ -1,0 +1,369 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title><%= product.title %> - Bookland</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;600;700&family=Manrope:wght@400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css"
+    />
+    <style>
+      :root {
+        --paper: #f7f2ea;
+        --ink: #111827;
+        --muted: #6b7280;
+        --accent: #f59e0b;
+        --accent-2: #0f766e;
+        --card: #ffffff;
+        --border: rgba(15, 23, 42, 0.12);
+      }
+
+      body {
+        font-family: "Manrope", sans-serif;
+        background: radial-gradient(circle at top left, #fff8ef 0%, #f7f2ea 45%, #f3efe8 100%);
+        color: var(--ink);
+        overflow-x: hidden;
+      }
+
+      .font-display {
+        font-family: "Playfair Display", serif;
+      }
+
+      .surface {
+        background: var(--card);
+        border: 1px solid var(--border);
+        box-shadow: 0 20px 40px rgba(15, 23, 42, 0.08);
+      }
+
+      .btn-primary {
+        background: linear-gradient(135deg, #0f172a, #0f766e);
+        color: #fff;
+        border-radius: 0.9rem;
+        padding: 0.7rem 1.3rem;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.4rem;
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+      }
+
+      .btn-primary:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 16px 30px rgba(15, 118, 110, 0.25);
+      }
+
+      .btn-ghost {
+        border: 1px solid var(--border);
+        background: #fff;
+        border-radius: 0.9rem;
+        padding: 0.65rem 1.2rem;
+        color: #0f172a;
+        transition: border 0.2s ease, transform 0.2s ease;
+      }
+
+      .btn-ghost:hover {
+        transform: translateY(-1px);
+        border-color: rgba(15, 23, 42, 0.25);
+      }
+
+      .form-input {
+        width: 100%;
+        border: 1px solid var(--border);
+        border-radius: 0.9rem;
+        padding: 0.65rem 0.9rem;
+        background: #fff;
+        color: #0f172a;
+        box-shadow: 0 1px 0 rgba(15, 23, 42, 0.05);
+      }
+
+      .form-input:focus {
+        outline: none;
+        border-color: #f59e0b;
+        box-shadow: 0 0 0 4px rgba(245, 158, 11, 0.15);
+      }
+
+      .card {
+        background: var(--card);
+        border: 1px solid var(--border);
+        border-radius: 1.6rem;
+        overflow: hidden;
+        box-shadow: 0 18px 35px rgba(15, 23, 42, 0.1);
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+      }
+
+      .card:hover {
+        transform: translateY(-6px);
+        box-shadow: 0 26px 50px rgba(15, 23, 42, 0.14);
+      }
+
+      .swiper-button-next,
+      .swiper-button-prev {
+        color: #0f172a;
+      }
+
+      .swiper-pagination-bullet-active {
+        background: #f59e0b;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="fixed inset-0 -z-10">
+      <div class="absolute -top-32 right-0 h-80 w-80 rounded-full bg-amber-200/50 blur-3xl"></div>
+      <div class="absolute top-32 -left-16 h-64 w-64 rounded-full bg-emerald-200/40 blur-3xl"></div>
+      <div class="absolute bottom-10 right-20 h-72 w-72 rounded-full bg-slate-200/60 blur-3xl"></div>
+    </div>
+
+    <header class="sticky top-0 z-30 bg-white/80 backdrop-blur border-b border-slate-200/60">
+      <div class="max-w-7xl mx-auto px-4 py-4 flex items-center justify-between">
+        <div class="flex items-center gap-3">
+          <a href="/" class="h-11 w-11 rounded-2xl bg-slate-900 text-white flex items-center justify-center font-bold">BK</a>
+          <div>
+            <div class="text-lg font-semibold">Bookland</div>
+            <div class="text-xs text-slate-500">Sach dep moi ngay</div>
+          </div>
+        </div>
+        <nav class="hidden md:flex items-center gap-5 text-sm text-slate-600">
+          <a href="/#promo" class="hover:text-slate-900">Khuyen mai</a>
+          <a href="/#new" class="hover:text-slate-900">Moi nhat</a>
+          <a href="/#best" class="hover:text-slate-900">Ban chay</a>
+          <a href="/#all" class="hover:text-slate-900">Tat ca</a>
+        </nav>
+        <div id="member-area" class="text-sm text-slate-600 flex items-center gap-3">
+          <button id="open-login" class="btn-ghost">Dang nhap</button>
+        </div>
+      </div>
+    </header>
+
+    <main class="max-w-7xl mx-auto px-4 py-10">
+      <div class="grid lg:grid-cols-[1.1fr_0.9fr] gap-8 items-start">
+        <div class="surface rounded-[32px] p-6">
+          <div class="text-xs text-slate-500">Danh muc: <span class="text-slate-900 font-semibold"><%= product.category %></span></div>
+          <div class="swiper rounded-2xl overflow-hidden mt-4">
+            <div class="swiper-wrapper">
+              <% product.images.forEach((img) => { %>
+                <div class="swiper-slide">
+                  <img src="<%= img %>" alt="<%= product.title %>" class="w-full h-[420px] object-cover" />
+                </div>
+              <% }) %>
+            </div>
+            <div class="swiper-pagination"></div>
+            <div class="swiper-button-prev"></div>
+            <div class="swiper-button-next"></div>
+          </div>
+        </div>
+
+        <div class="surface rounded-[32px] p-6 lg:sticky lg:top-24">
+          <h1 class="font-display text-3xl font-semibold"><%= product.title %></h1>
+          <div class="text-sm text-slate-500 mt-1">Tac gia: <%= product.author %></div>
+          <div class="mt-4 flex items-center gap-3">
+            <span class="text-2xl font-semibold"><%= formatPrice(product.finalPrice) %> VND</span>
+            <% if (product.hasDiscount) { %>
+              <span class="text-sm text-slate-400 line-through"><%= formatPrice(product.price) %> VND</span>
+              <span class="text-xs text-amber-600 font-semibold">-<%= product.discountPercent %>%</span>
+            <% } %>
+          </div>
+
+          <div class="mt-5 grid grid-cols-2 gap-4 text-sm">
+            <div class="bg-slate-50 rounded-2xl p-4">
+              <div class="text-xs text-slate-500">Ton kho</div>
+              <div class="font-semibold"><%= product.stock %> cuon</div>
+            </div>
+            <div class="bg-slate-50 rounded-2xl p-4">
+              <div class="text-xs text-slate-500">Da ban</div>
+              <div class="font-semibold"><%= product.sold %> cuon</div>
+            </div>
+          </div>
+
+          <div class="mt-6">
+            <div class="text-xs text-slate-500">So luong</div>
+            <div class="mt-2 inline-flex items-center gap-3">
+              <button id="qty-minus" class="h-10 w-10 rounded-xl border border-slate-200">-</button>
+              <input id="qty-input" value="1" class="h-10 w-20 rounded-xl border border-slate-200 text-center" />
+              <button id="qty-plus" class="h-10 w-10 rounded-xl border border-slate-200">+</button>
+              <span class="text-xs text-slate-500">Con <%= product.stock %> cuon</span>
+            </div>
+          </div>
+
+          <div class="mt-6 flex flex-wrap gap-3">
+            <button class="btn-primary">Them vao gio</button>
+            <a href="/" class="btn-ghost">Quay lai</a>
+          </div>
+
+          <div class="mt-6 text-sm text-slate-600 leading-relaxed">
+            <%= product.description %>
+          </div>
+
+          <div class="mt-4 flex flex-wrap gap-2">
+            <% product.tags.forEach((tag) => { %>
+              <span class="text-xs bg-slate-100 text-slate-600 px-3 py-1 rounded-full"><%= tag %></span>
+            <% }) %>
+          </div>
+        </div>
+      </div>
+
+      <section class="mt-12">
+        <div class="flex items-center justify-between mb-5">
+          <h2 class="font-display text-2xl font-semibold">San pham tuong tu</h2>
+          <span class="text-xs text-slate-500">Cung danh muc <%= product.category %></span>
+        </div>
+        <div class="grid sm:grid-cols-2 lg:grid-cols-4 gap-5">
+          <% similarProducts.forEach((p, idx) => { %>
+            <div class="card group" style="animation-delay: <%= idx * 0.05 %>s">
+              <div class="relative">
+                <img src="<%= p.images[0] %>" alt="<%= p.title %>" class="h-44 w-full object-cover transition-transform duration-300 group-hover:scale-105" />
+                <% if (p.isNew) { %>
+                  <span class="absolute top-3 left-3 text-xs font-semibold bg-emerald-100 text-emerald-700 px-3 py-1 rounded-full">Moi</span>
+                <% } %>
+              </div>
+              <div class="p-5">
+                <div class="text-xs text-slate-500"><%= p.category %></div>
+                <a href="/product/<%= p.slug %>" class="block font-semibold mt-1 hover:text-slate-900"><%= p.title %></a>
+                <div class="text-xs text-slate-500">Tac gia: <%= p.author %></div>
+                <div class="mt-3 flex items-center gap-2">
+                  <span class="text-lg font-semibold"><%= formatPrice(p.finalPrice) %> VND</span>
+                  <% if (p.hasDiscount) { %>
+                    <span class="text-xs text-slate-400 line-through"><%= formatPrice(p.price) %> VND</span>
+                  <% } %>
+                </div>
+              </div>
+            </div>
+          <% }) %>
+        </div>
+      </section>
+    </main>
+
+    <div id="login-modal" class="fixed inset-0 bg-black/60 hidden items-center justify-center">
+      <div class="surface rounded-3xl w-full max-w-md p-6">
+        <div class="flex items-center justify-between">
+          <h3 class="font-display text-lg font-semibold">Dang nhap thanh vien</h3>
+          <button id="close-login" class="text-slate-400 hover:text-slate-600">Dong</button>
+        </div>
+        <form id="login-form" class="mt-4 space-y-4">
+          <div>
+            <label class="text-xs text-slate-500">Email</label>
+            <input name="email" type="email" required class="form-input mt-1" placeholder="ban@example.com" />
+          </div>
+          <div>
+            <label class="text-xs text-slate-500">Mat khau</label>
+            <input name="password" type="password" required class="form-input mt-1" placeholder="******" />
+          </div>
+          <div id="login-error" class="text-sm text-rose-600 hidden"></div>
+          <button class="btn-primary w-full justify-center">Dang nhap</button>
+        </form>
+      </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
+    <script>
+      const memberArea = document.getElementById("member-area");
+      const loginModal = document.getElementById("login-modal");
+      const openLogin = () => loginModal.classList.remove("hidden");
+      const closeLogin = () => loginModal.classList.add("hidden");
+      const openLoginButton = document.getElementById("open-login");
+      if (openLoginButton) openLoginButton.addEventListener("click", openLogin);
+      document.getElementById("close-login").addEventListener("click", closeLogin);
+
+      const renderGuest = () => {
+        memberArea.innerHTML = "<button id=\"open-login\" class=\"btn-ghost\">Dang nhap</button>";
+        document.getElementById("open-login").addEventListener("click", openLogin);
+      };
+
+      const renderMember = (user) => {
+        memberArea.innerHTML = `
+          <div class="text-right">
+            <div class="text-sm font-semibold text-slate-900">${user.name || "Thanh vien"}</div>
+            <div class="text-xs text-slate-500">${user.email}</div>
+            <div class="text-[10px] uppercase text-slate-400">${user.role}</div>
+          </div>
+          <button id="logout-btn" class="btn-ghost">Dang xuat</button>
+        `;
+        document.getElementById("logout-btn").addEventListener("click", () => {
+          localStorage.removeItem("access_token");
+          location.reload();
+        });
+      };
+
+      const token = localStorage.getItem("access_token");
+      if (token) {
+        fetch("/v1/api/account", {
+          headers: { Authorization: `Bearer ${token}` }
+        })
+          .then((res) => res.json())
+          .then((data) => {
+            if (data && !data.message) renderMember(data);
+            else renderGuest();
+          })
+          .catch(() => renderGuest());
+      } else {
+        renderGuest();
+      }
+
+      document.getElementById("login-form").addEventListener("submit", async (event) => {
+        event.preventDefault();
+        const formData = new FormData(event.target);
+        const payload = {
+          email: formData.get("email"),
+          password: formData.get("password"),
+        };
+        const errorEl = document.getElementById("login-error");
+        errorEl.classList.add("hidden");
+
+        const response = await fetch("/v1/api/login", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload),
+        });
+
+        const data = await response.json();
+        if (data && data.EC === 0) {
+          localStorage.setItem("access_token", data.access_token);
+          window.location.href = "/";
+        } else {
+          errorEl.textContent = data?.EM || "Dang nhap that bai";
+          errorEl.classList.remove("hidden");
+        }
+      });
+
+      const maxQty = <%= product.stock %>;
+      const qtyInput = document.getElementById("qty-input");
+      const qtyMinus = document.getElementById("qty-minus");
+      const qtyPlus = document.getElementById("qty-plus");
+
+      const clampQty = (value) => {
+        if (!Number.isFinite(value)) return 1;
+        if (value < 1) return 1;
+        if (value > maxQty) return maxQty || 1;
+        return value;
+      };
+
+      qtyMinus.addEventListener("click", () => {
+        const value = clampQty(Number(qtyInput.value) - 1);
+        qtyInput.value = value;
+      });
+
+      qtyPlus.addEventListener("click", () => {
+        const value = clampQty(Number(qtyInput.value) + 1);
+        qtyInput.value = value;
+      });
+
+      qtyInput.addEventListener("input", () => {
+        qtyInput.value = clampQty(Number(qtyInput.value));
+      });
+
+      if (<%= product.images.length %> > 1) {
+        new Swiper(".swiper", {
+          loop: true,
+          pagination: { el: ".swiper-pagination" },
+          navigation: { nextEl: ".swiper-button-next", prevEl: ".swiper-button-prev" },
+        });
+      }
+    </script>
+  </body>
+</html>

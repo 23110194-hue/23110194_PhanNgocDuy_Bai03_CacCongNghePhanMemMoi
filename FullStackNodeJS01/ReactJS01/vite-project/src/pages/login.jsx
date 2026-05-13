@@ -60,7 +60,7 @@ const LoginPage = () => {
         <Row justify="center" style={{ marginTop: "60px", marginBottom: "40px" }}>
             <Col xs={23} md={16} lg={9}>
                 <div style={formBoxStyle}>
-                    <h2 style={{ textAlign: "center", marginBottom: "24px", color: "#4f46e5" }}>
+                    <h2 style={{ textAlign: "center", marginBottom: "24px", color: "#0f766e" }}>
                         Đăng Nhập
                     </h2>
 
@@ -93,7 +93,7 @@ const LoginPage = () => {
                         </Form.Item>
 
                         <div style={{ textAlign: "right", marginBottom: "16px" }}>
-                            <Link to="/forgot-password" style={{ color: "#4f46e5" }}>
+                            <Link to="/forgot-password" style={{ color: "#0f766e" }}>
                                 Quên mật khẩu?
                             </Link>
                         </div>
@@ -104,7 +104,7 @@ const LoginPage = () => {
                             block
                             size="large"
                             loading={loading}
-                            style={{ background: "#4f46e5", borderColor: "#4f46e5" }}
+                            style={{ background: "#0f766e", borderColor: "#0f766e" }}
                         >
                             Đăng Nhập
                         </Button>
@@ -112,7 +112,7 @@ const LoginPage = () => {
 
                     <Divider />
                     <div style={{ textAlign: "center" }}>
-                        Chưa có tài khoản? <Link to="/register" style={{ color: "#4f46e5" }}>Đăng ký tại đây</Link>
+                        Chưa có tài khoản? <Link to="/register" style={{ color: "#0f766e" }}>Đăng ký tại đây</Link>
                     </div>
                 </div>
             </Col>

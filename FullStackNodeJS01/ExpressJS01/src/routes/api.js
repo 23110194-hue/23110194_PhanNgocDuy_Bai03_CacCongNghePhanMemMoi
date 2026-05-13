@@ -9,6 +9,11 @@ const {
     handleVerifyForgotPasswordOTP,
 } = require('../controllers/userController');
 
+const {
+    apiGetProducts,
+    apiGetProductDetail,
+} = require('../controllers/homeController');
+
 const { auth, authorizeRole } = require('../middleware/auth');
 const delay = require('../middleware/delay');
 const { registerLimiter, loginLimiter, otpLimiter } = require('../middleware/rateLimiter');
@@ -25,6 +30,9 @@ const routerAPI = express.Router();
 routerAPI.use(auth);
 
 routerAPI.get("/", (req, res) => res.status(200).json("Hello world api"));
+
+routerAPI.get("/products", apiGetProducts);
+routerAPI.get("/products/:slug", apiGetProductDetail);
 
 routerAPI.post("/register", registerLimiter, validateRegister, createUser);
 

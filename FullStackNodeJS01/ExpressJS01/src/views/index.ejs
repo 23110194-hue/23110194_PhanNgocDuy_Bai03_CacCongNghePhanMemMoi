@@ -1,14 +1,463 @@
+<!DOCTYPE html>
 <html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Bookland - Trang chu sach</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;600;700&family=Manrope:wght@400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      :root {
+        --paper: #f7f2ea;
+        --ink: #111827;
+        --muted: #6b7280;
+        --accent: #f59e0b;
+        --accent-2: #0f766e;
+        --card: #ffffff;
+        --border: rgba(15, 23, 42, 0.12);
+      }
 
-<head>
-    <meta charset="UTF-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Nodejs</title>
-</head>
+      body {
+        font-family: "Manrope", sans-serif;
+        background: radial-gradient(circle at top left, #fff8ef 0%, #f7f2ea 45%, #f3efe8 100%);
+        color: var(--ink);
+        overflow-x: hidden;
+      }
 
-<body>
-    <h1> hello world with nodejs</h1>
-</body>
+      .font-display {
+        font-family: "Playfair Display", serif;
+      }
 
+      .surface {
+        background: var(--card);
+        border: 1px solid var(--border);
+        box-shadow: 0 20px 40px rgba(15, 23, 42, 0.08);
+      }
+
+      .btn-primary {
+        background: linear-gradient(135deg, #0f172a, #0f766e);
+        color: #fff;
+        border-radius: 0.9rem;
+        padding: 0.7rem 1.3rem;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.4rem;
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+      }
+
+      .btn-primary:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 16px 30px rgba(15, 118, 110, 0.25);
+      }
+
+      .btn-ghost {
+        border: 1px solid var(--border);
+        background: #fff;
+        border-radius: 0.9rem;
+        padding: 0.65rem 1.2rem;
+        color: #0f172a;
+        transition: border 0.2s ease, transform 0.2s ease;
+      }
+
+      .btn-ghost:hover {
+        transform: translateY(-1px);
+        border-color: rgba(15, 23, 42, 0.25);
+      }
+
+      .form-input,
+      .form-select {
+        width: 100%;
+        border: 1px solid var(--border);
+        border-radius: 0.9rem;
+        padding: 0.65rem 0.9rem;
+        background: #fff;
+        color: #0f172a;
+        box-shadow: 0 1px 0 rgba(15, 23, 42, 0.05);
+      }
+
+      .form-input:focus,
+      .form-select:focus {
+        outline: none;
+        border-color: #f59e0b;
+        box-shadow: 0 0 0 4px rgba(245, 158, 11, 0.15);
+      }
+
+      .card {
+        background: var(--card);
+        border: 1px solid var(--border);
+        border-radius: 1.6rem;
+        overflow: hidden;
+        box-shadow: 0 18px 35px rgba(15, 23, 42, 0.1);
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+      }
+
+      .card:hover {
+        transform: translateY(-6px);
+        box-shadow: 0 26px 50px rgba(15, 23, 42, 0.14);
+      }
+
+      .fade-up {
+        animation: fadeUp 0.6s ease both;
+        animation-delay: var(--delay, 0s);
+      }
+
+      @keyframes fadeUp {
+        from {
+          opacity: 0;
+          transform: translateY(12px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="fixed inset-0 -z-10">
+      <div class="absolute -top-32 right-0 h-80 w-80 rounded-full bg-amber-200/50 blur-3xl"></div>
+      <div class="absolute top-32 -left-16 h-64 w-64 rounded-full bg-emerald-200/40 blur-3xl"></div>
+      <div class="absolute bottom-10 right-20 h-72 w-72 rounded-full bg-slate-200/60 blur-3xl"></div>
+    </div>
+
+    <header class="sticky top-0 z-30 bg-white/80 backdrop-blur border-b border-slate-200/60">
+      <div class="max-w-7xl mx-auto px-4 py-4 flex items-center justify-between">
+        <div class="flex items-center gap-3">
+          <div class="h-11 w-11 rounded-2xl bg-slate-900 text-white flex items-center justify-center font-bold">BK</div>
+          <div>
+            <div class="text-lg font-semibold">Bookland</div>
+            <div class="text-xs text-slate-500">Sach dep moi ngay</div>
+          </div>
+        </div>
+        <nav class="hidden md:flex items-center gap-5 text-sm text-slate-600">
+          <a href="#promo" class="hover:text-slate-900">Khuyen mai</a>
+          <a href="#new" class="hover:text-slate-900">Moi nhat</a>
+          <a href="#best" class="hover:text-slate-900">Ban chay</a>
+          <a href="#all" class="hover:text-slate-900">Tat ca</a>
+        </nav>
+        <div id="member-area" class="text-sm text-slate-600 flex items-center gap-3">
+          <button id="open-login" class="btn-ghost">Dang nhap</button>
+        </div>
+      </div>
+    </header>
+
+    <section class="max-w-7xl mx-auto px-4 py-10">
+      <div class="grid lg:grid-cols-[1.6fr_1fr] gap-6 items-stretch">
+        <div class="surface rounded-[32px] p-8">
+          <div class="text-xs uppercase tracking-[0.2em] text-slate-500">Bo suu tap sach</div>
+          <h1 class="font-display text-3xl md:text-5xl font-semibold mt-3">Doc sach thong minh, tu duy sau hon</h1>
+          <p class="text-slate-600 mt-4">Chon sach theo danh muc, khuyen mai, moi nhat hoac ban chay nhat. Cap nhat moi tuan.</p>
+          <div class="mt-6 flex flex-wrap gap-3">
+            <a href="#all" class="btn-primary">Mua ngay</a>
+            <a href="#promo" class="btn-ghost">Xem khuyen mai</a>
+          </div>
+          <div class="mt-8 grid grid-cols-3 gap-4 text-sm">
+            <div class="bg-slate-50 rounded-2xl p-4">
+              <div class="text-xs text-slate-500">Danh muc</div>
+              <div class="text-lg font-semibold">6+</div>
+            </div>
+            <div class="bg-slate-50 rounded-2xl p-4">
+              <div class="text-xs text-slate-500">Giam gia</div>
+              <div class="text-lg font-semibold">30%</div>
+            </div>
+            <div class="bg-slate-50 rounded-2xl p-4">
+              <div class="text-xs text-slate-500">Doc gia</div>
+              <div class="text-lg font-semibold">1.2K</div>
+            </div>
+          </div>
+        </div>
+        <div class="grid gap-4">
+          <div class="surface rounded-[28px] p-6 flex flex-col justify-between">
+            <div>
+              <div class="text-xs uppercase tracking-[0.2em] text-slate-500">Thanh vien</div>
+              <h2 class="font-display text-2xl font-semibold mt-2">Nhan uu dai doc gia</h2>
+              <p class="text-sm text-slate-600 mt-3">Dang nhap de xem thong tin thanh vien, luu sach yeu thich va nhan thong bao giam gia.</p>
+            </div>
+            <button id="cta-login" class="btn-primary mt-6 w-fit">Dang nhap</button>
+          </div>
+          <div class="rounded-[28px] p-6 bg-slate-900 text-white">
+            <div class="text-xs uppercase tracking-[0.2em] text-slate-300">Goi y</div>
+            <h3 class="font-display text-2xl font-semibold mt-2">Doc 15 phut moi ngay</h3>
+            <p class="text-sm text-slate-300 mt-3">Tao thoi quen doc sach de nang cap tu duy va tu tin.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="max-w-7xl mx-auto px-4 pb-10">
+      <form action="/" method="get" class="surface rounded-[28px] p-6 grid md:grid-cols-6 gap-4">
+        <div class="md:col-span-2">
+          <label class="text-xs text-slate-500">Tu khoa</label>
+          <input name="q" value="<%= filters.q %>" class="form-input mt-1" placeholder="Nhap ten sach, tac gia" />
+        </div>
+        <div>
+          <label class="text-xs text-slate-500">Danh muc</label>
+          <select name="category" class="form-select mt-1">
+            <option value="all" <%= filters.category === "all" ? "selected" : "" %>>Tat ca</option>
+            <% categories.forEach((cat) => { %>
+              <option value="<%= cat %>" <%= filters.category === cat ? "selected" : "" %>><%= cat %></option>
+            <% }) %>
+          </select>
+        </div>
+        <div>
+          <label class="text-xs text-slate-500">Gia tu</label>
+          <input name="minPrice" value="<%= filters.minPrice %>" type="number" class="form-input mt-1" placeholder="0" />
+        </div>
+        <div>
+          <label class="text-xs text-slate-500">Gia den</label>
+          <input name="maxPrice" value="<%= filters.maxPrice %>" type="number" class="form-input mt-1" placeholder="500000" />
+        </div>
+        <div class="flex flex-col justify-between">
+          <label class="text-xs text-slate-500">Sap xep</label>
+          <select name="sort" class="form-select mt-1">
+            <option value="newest" <%= filters.sort === "newest" ? "selected" : "" %>>Moi nhat</option>
+            <option value="best" <%= filters.sort === "best" ? "selected" : "" %>>Ban chay</option>
+            <option value="price-asc" <%= filters.sort === "price-asc" ? "selected" : "" %>>Gia tang</option>
+            <option value="price-desc" <%= filters.sort === "price-desc" ? "selected" : "" %>>Gia giam</option>
+          </select>
+        </div>
+        <div class="md:col-span-6 flex flex-wrap items-center gap-4">
+          <label class="inline-flex items-center gap-2 text-sm text-slate-600">
+            <input type="checkbox" name="inStock" value="true" <%= filters.inStock ? "checked" : "" %> />
+            Con hang
+          </label>
+          <label class="inline-flex items-center gap-2 text-sm text-slate-600">
+            <input type="checkbox" name="promo" value="true" <%= filters.promo ? "checked" : "" %> />
+            Dang giam gia
+          </label>
+          <div class="ml-auto flex gap-3">
+            <a href="/" class="btn-ghost">Xoa loc</a>
+            <button class="btn-primary">Loc san pham</button>
+          </div>
+        </div>
+      </form>
+    </section>
+
+    <section id="promo" class="max-w-7xl mx-auto px-4 pb-10">
+      <div class="flex items-center justify-between mb-5">
+        <h2 class="font-display text-2xl font-semibold">Khuyen mai noi bat</h2>
+        <span class="text-xs text-slate-500">Giam gia tot nhat</span>
+      </div>
+      <div class="grid sm:grid-cols-2 lg:grid-cols-4 gap-5">
+        <% promoProducts.forEach((p, idx) => { %>
+          <div class="card group fade-up" style="--delay: <%= idx * 0.05 %>s">
+            <div class="relative">
+              <img src="<%= p.images[0] %>" alt="<%= p.title %>" class="h-48 w-full object-cover transition-transform duration-300 group-hover:scale-105" />
+              <span class="absolute top-3 left-3 text-xs font-semibold bg-amber-100 text-amber-700 px-3 py-1 rounded-full">Giam <%= p.discountPercent %>%</span>
+            </div>
+            <div class="p-5">
+              <div class="text-xs text-slate-500"><%= p.category %></div>
+              <a href="/product/<%= p.slug %>" class="block font-semibold mt-1 hover:text-slate-900"><%= p.title %></a>
+              <div class="text-xs text-slate-500">Tac gia: <%= p.author %></div>
+              <div class="mt-3 flex items-center gap-2">
+                <span class="text-lg font-semibold"><%= formatPrice(p.finalPrice) %> VND</span>
+                <span class="text-xs text-slate-400 line-through"><%= formatPrice(p.price) %> VND</span>
+              </div>
+            </div>
+          </div>
+        <% }) %>
+      </div>
+    </section>
+
+    <section id="new" class="max-w-7xl mx-auto px-4 pb-10">
+      <div class="flex items-center justify-between mb-5">
+        <h2 class="font-display text-2xl font-semibold">Moi nhat</h2>
+        <span class="text-xs text-slate-500">Sach moi ve kho</span>
+      </div>
+      <div class="grid sm:grid-cols-2 lg:grid-cols-4 gap-5">
+        <% newProducts.forEach((p, idx) => { %>
+          <div class="card group fade-up" style="--delay: <%= idx * 0.05 %>s">
+            <div class="relative">
+              <img src="<%= p.images[0] %>" alt="<%= p.title %>" class="h-48 w-full object-cover transition-transform duration-300 group-hover:scale-105" />
+              <span class="absolute top-3 left-3 text-xs font-semibold bg-emerald-100 text-emerald-700 px-3 py-1 rounded-full">Moi</span>
+            </div>
+            <div class="p-5">
+              <div class="text-xs text-slate-500"><%= p.category %></div>
+              <a href="/product/<%= p.slug %>" class="block font-semibold mt-1 hover:text-slate-900"><%= p.title %></a>
+              <div class="text-xs text-slate-500">Tac gia: <%= p.author %></div>
+              <div class="mt-3 flex items-center gap-2">
+                <span class="text-lg font-semibold"><%= formatPrice(p.finalPrice) %> VND</span>
+                <% if (p.hasDiscount) { %>
+                  <span class="text-xs text-slate-400 line-through"><%= formatPrice(p.price) %> VND</span>
+                <% } %>
+              </div>
+            </div>
+          </div>
+        <% }) %>
+      </div>
+    </section>
+
+    <section id="best" class="max-w-7xl mx-auto px-4 pb-10">
+      <div class="flex items-center justify-between mb-5">
+        <h2 class="font-display text-2xl font-semibold">Ban chay nhat</h2>
+        <span class="text-xs text-slate-500">Lua chon cua doc gia</span>
+      </div>
+      <div class="grid sm:grid-cols-2 lg:grid-cols-4 gap-5">
+        <% bestProducts.forEach((p, idx) => { %>
+          <div class="card group fade-up" style="--delay: <%= idx * 0.05 %>s">
+            <div class="relative">
+              <img src="<%= p.images[0] %>" alt="<%= p.title %>" class="h-48 w-full object-cover transition-transform duration-300 group-hover:scale-105" />
+              <span class="absolute top-3 left-3 text-xs font-semibold bg-slate-900 text-white px-3 py-1 rounded-full">Hot</span>
+            </div>
+            <div class="p-5">
+              <div class="text-xs text-slate-500"><%= p.category %></div>
+              <a href="/product/<%= p.slug %>" class="block font-semibold mt-1 hover:text-slate-900"><%= p.title %></a>
+              <div class="text-xs text-slate-500">Da ban: <%= p.sold %></div>
+              <div class="mt-3 flex items-center gap-2">
+                <span class="text-lg font-semibold"><%= formatPrice(p.finalPrice) %> VND</span>
+                <% if (p.hasDiscount) { %>
+                  <span class="text-xs text-slate-400 line-through"><%= formatPrice(p.price) %> VND</span>
+                <% } %>
+              </div>
+            </div>
+          </div>
+        <% }) %>
+      </div>
+    </section>
+
+    <section id="all" class="max-w-7xl mx-auto px-4 pb-16">
+      <div class="flex items-center justify-between mb-5">
+        <div>
+          <h2 class="font-display text-2xl font-semibold">Tat ca san pham</h2>
+          <div class="text-xs text-slate-500">Ket qua: <%= total %> san pham</div>
+        </div>
+        <a href="/" class="text-sm text-slate-600 hover:text-slate-900">Reset</a>
+      </div>
+      <% if (products.length === 0) { %>
+        <div class="surface rounded-2xl p-6 text-center text-slate-500">Khong tim thay san pham phu hop.</div>
+      <% } else { %>
+        <div class="grid sm:grid-cols-2 lg:grid-cols-4 gap-5">
+          <% products.forEach((p, idx) => { %>
+            <div class="card group fade-up" style="--delay: <%= idx * 0.03 %>s">
+              <div class="relative">
+                <img src="<%= p.images[0] %>" alt="<%= p.title %>" class="h-48 w-full object-cover transition-transform duration-300 group-hover:scale-105" />
+                <% if (p.isNew) { %>
+                  <span class="absolute top-3 left-3 text-xs font-semibold bg-emerald-100 text-emerald-700 px-3 py-1 rounded-full">Moi</span>
+                <% } %>
+                <% if (p.isHot) { %>
+                  <span class="absolute top-3 right-3 text-xs font-semibold bg-slate-900 text-white px-3 py-1 rounded-full">Hot</span>
+                <% } %>
+              </div>
+              <div class="p-5">
+                <div class="text-xs text-slate-500"><%= p.category %></div>
+                <a href="/product/<%= p.slug %>" class="block font-semibold mt-1 hover:text-slate-900"><%= p.title %></a>
+                <div class="text-xs text-slate-500">Tac gia: <%= p.author %></div>
+                <div class="mt-3 flex items-center gap-2">
+                  <span class="text-lg font-semibold"><%= formatPrice(p.finalPrice) %> VND</span>
+                  <% if (p.hasDiscount) { %>
+                    <span class="text-xs text-slate-400 line-through"><%= formatPrice(p.price) %> VND</span>
+                    <span class="text-xs text-amber-600 font-semibold">-<%= p.discountPercent %>%</span>
+                  <% } %>
+                </div>
+                <div class="mt-3 flex justify-between text-xs text-slate-500">
+                  <span>Con: <%= p.stock %></span>
+                  <span>Da ban: <%= p.sold %></span>
+                </div>
+                <a href="/product/<%= p.slug %>" class="mt-4 inline-flex w-full items-center justify-center rounded-xl border border-slate-200 py-2 text-sm hover:border-slate-300">Xem chi tiet</a>
+              </div>
+            </div>
+          <% }) %>
+        </div>
+      <% } %>
+    </section>
+
+    <div id="login-modal" class="fixed inset-0 bg-black/60 hidden items-center justify-center">
+      <div class="surface rounded-3xl w-full max-w-md p-6">
+        <div class="flex items-center justify-between">
+          <h3 class="font-display text-lg font-semibold">Dang nhap thanh vien</h3>
+          <button id="close-login" class="text-slate-400 hover:text-slate-600">Dong</button>
+        </div>
+        <form id="login-form" class="mt-4 space-y-4">
+          <div>
+            <label class="text-xs text-slate-500">Email</label>
+            <input name="email" type="email" required class="form-input mt-1" placeholder="ban@example.com" />
+          </div>
+          <div>
+            <label class="text-xs text-slate-500">Mat khau</label>
+            <input name="password" type="password" required class="form-input mt-1" placeholder="******" />
+          </div>
+          <div id="login-error" class="text-sm text-rose-600 hidden"></div>
+          <button class="btn-primary w-full justify-center">Dang nhap</button>
+        </form>
+      </div>
+    </div>
+
+    <script>
+      const memberArea = document.getElementById("member-area");
+      const loginModal = document.getElementById("login-modal");
+      const openLogin = () => loginModal.classList.remove("hidden");
+      const closeLogin = () => loginModal.classList.add("hidden");
+      const openLoginButton = document.getElementById("open-login");
+      const ctaLoginButton = document.getElementById("cta-login");
+      if (openLoginButton) openLoginButton.addEventListener("click", openLogin);
+      if (ctaLoginButton) ctaLoginButton.addEventListener("click", openLogin);
+      document.getElementById("close-login").addEventListener("click", closeLogin);
+
+      const renderGuest = () => {
+        memberArea.innerHTML = "<button id=\"open-login\" class=\"btn-ghost\">Dang nhap</button>";
+        document.getElementById("open-login").addEventListener("click", openLogin);
+      };
+
+      const renderMember = (user) => {
+        memberArea.innerHTML = `
+          <div class="text-right">
+            <div class="text-sm font-semibold text-slate-900">${user.name || "Thanh vien"}</div>
+            <div class="text-xs text-slate-500">${user.email}</div>
+            <div class="text-[10px] uppercase text-slate-400">${user.role}</div>
+          </div>
+          <button id="logout-btn" class="btn-ghost">Dang xuat</button>
+        `;
+        document.getElementById("logout-btn").addEventListener("click", () => {
+          localStorage.removeItem("access_token");
+          location.reload();
+        });
+      };
+
+      const token = localStorage.getItem("access_token");
+      if (token) {
+        fetch("/v1/api/account", {
+          headers: { Authorization: `Bearer ${token}` }
+        })
+          .then((res) => res.json())
+          .then((data) => {
+            if (data && !data.message) renderMember(data);
+            else renderGuest();
+          })
+          .catch(() => renderGuest());
+      } else {
+        renderGuest();
+      }
+
+      document.getElementById("login-form").addEventListener("submit", async (event) => {
+        event.preventDefault();
+        const formData = new FormData(event.target);
+        const payload = {
+          email: formData.get("email"),
+          password: formData.get("password"),
+        };
+        const errorEl = document.getElementById("login-error");
+        errorEl.classList.add("hidden");
+
+        const response = await fetch("/v1/api/login", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload),
+        });
+
+        const data = await response.json();
+        if (data && data.EC === 0) {
+          localStorage.setItem("access_token", data.access_token);
+          window.location.href = "/";
+        } else {
+          errorEl.textContent = data?.EM || "Dang nhap that bai";
+          errorEl.classList.remove("hidden");
+        }
+      });
+    </script>
+  </body>
 </html>

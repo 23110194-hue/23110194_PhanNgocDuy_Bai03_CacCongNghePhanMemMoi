@@ -83,7 +83,7 @@ const ForgotPasswordPage = () => {
         <Row justify="center" style={{ marginTop: "40px", marginBottom: "40px" }}>
             <Col xs={23} md={16} lg={9}>
                 <div style={formBoxStyle}>
-                    <h2 style={{ textAlign: "center", marginBottom: "24px", color: "#4f46e5" }}>
+                    <h2 style={{ textAlign: "center", marginBottom: "24px", color: "#0f766e" }}>
                         Quên Mật Khẩu
                     </h2>
 
@@ -119,7 +119,7 @@ const ForgotPasswordPage = () => {
                                 block
                                 size="large"
                                 loading={loading}
-                                style={{ background: "#4f46e5", borderColor: "#4f46e5" }}
+                                style={{ background: "#0f766e", borderColor: "#0f766e" }}
                             >
                                 Gửi mã OTP
                             </Button>
@@ -129,10 +129,10 @@ const ForgotPasswordPage = () => {
                     {currentStep === 1 && (
                         <div>
                             <div style={{
-                                background: "#f0f0ff", borderRadius: "8px",
+                                background: "#ecfdf5", borderRadius: "8px",
                                 padding: "16px", marginBottom: "20px", textAlign: "center"
                             }}>
-                                <MailOutlined style={{ fontSize: 32, color: "#4f46e5", marginBottom: 8 }} />
+                                <MailOutlined style={{ fontSize: 32, color: "#0f766e", marginBottom: 8 }} />
                                 <p style={{ margin: 0, color: "#555" }}>
                                     Mã OTP đã được gửi đến <strong>{forgotEmail}</strong>
                                 </p>
@@ -204,7 +204,7 @@ const ForgotPasswordPage = () => {
                                     block
                                     size="large"
                                     loading={loading}
-                                    style={{ background: "#4f46e5", borderColor: "#4f46e5", marginBottom: 10 }}
+                                    style={{ background: "#0f766e", borderColor: "#0f766e", marginBottom: 10 }}
                                 >
                                     Đặt Lại Mật Khẩu
                                 </Button>
@@ -232,10 +232,10 @@ const ForgotPasswordPage = () => {
 
                     <Divider />
                     <div style={{ textAlign: "center" }}>
-                        Nhớ mật khẩu rồi? <Link to="/login" style={{ color: "#4f46e5" }}>Đăng nhập</Link>
+                        Nhớ mật khẩu rồi? <Link to="/login" style={{ color: "#0f766e" }}>Đăng nhập</Link>
                     </div>
                     <div style={{ textAlign: "center", marginTop: 8 }}>
-                        Chưa có tài khoản? <Link to="/register" style={{ color: "#4f46e5" }}>Đăng ký</Link>
+                        Chưa có tài khoản? <Link to="/register" style={{ color: "#0f766e" }}>Đăng ký</Link>
                     </div>
                 </div>
             </Col>

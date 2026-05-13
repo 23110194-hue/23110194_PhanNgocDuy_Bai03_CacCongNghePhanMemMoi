@@ -3,7 +3,7 @@ const express = require('express');
 const configViewEngine = require('./config/viewEngine');
 const apiRoutes = require('./routes/api');
 const connection = require('./config/database');
-const { getHomepage } = require('./controllers/homeController');
+const { getHomepage, getProductDetail } = require('./controllers/homeController');
 const cors = require('cors');
 const User = require('./models/user');
 
@@ -18,6 +18,7 @@ configViewEngine(app);
 
 const webAPI = express.Router();
 webAPI.get("/", getHomepage);
+webAPI.get("/product/:slug", getProductDetail);
 app.use('/', webAPI);
 
 app.use('/v1/api/', apiRoutes);

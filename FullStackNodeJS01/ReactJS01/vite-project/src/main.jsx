@@ -15,6 +15,8 @@ import LoginPage from './pages/login.jsx';
 import ForgotPasswordPage from './pages/forgotPassword.jsx';
 import UserProfile from './pages/UserProfile.jsx';
 import AdminProfile from './pages/AdminProfile.jsx';
+import Products from './pages/Products.jsx';
+import ProductDetail from './pages/ProductDetail.jsx';
 import { AuthWrapper } from './components/context/auth.context.jsx';
 
 const router = createBrowserRouter([
@@ -23,6 +25,8 @@ const router = createBrowserRouter([
     element: <App />,
     children: [
       { index: true, element: <HomePage /> },
+      { path: "products", element: <Products /> },
+      { path: "product/:slug", element: <ProductDetail /> },
       { path: "user", element: <UserPage /> },
       { path: "user/profile", element: <UserProfile /> },
       { path: "admin/profile", element: <AdminProfile /> },

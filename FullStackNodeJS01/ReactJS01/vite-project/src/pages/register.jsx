@@ -86,7 +86,7 @@ const RegisterPage = () => {
         <Row justify="center" style={{ marginTop: "40px", marginBottom: "40px" }}>
             <Col xs={23} md={16} lg={9}>
                 <div style={formBoxStyle}>
-                    <h2 style={{ textAlign: "center", marginBottom: "24px", color: "#4f46e5" }}>
+                    <h2 style={{ textAlign: "center", marginBottom: "24px", color: "#0f766e" }}>
                         Đăng Ký Tài Khoản
                     </h2>
 
@@ -172,7 +172,7 @@ const RegisterPage = () => {
                                 block
                                 size="large"
                                 loading={loading}
-                                style={{ background: "#4f46e5", borderColor: "#4f46e5" }}
+                                style={{ background: "#0f766e", borderColor: "#0f766e" }}
                             >
                                 Tiếp tục
                             </Button>
@@ -185,7 +185,7 @@ const RegisterPage = () => {
                                 background: "#f0f0ff", borderRadius: "8px",
                                 padding: "16px", marginBottom: "20px", textAlign: "center"
                             }}>
-                                <MailOutlined style={{ fontSize: 32, color: "#4f46e5", marginBottom: 8 }} />
+                                <MailOutlined style={{ fontSize: 32, color: "#0f766e", marginBottom: 8 }} />
                                 <p style={{ margin: 0, color: "#555" }}>
                                     Mã OTP đã được gửi đến <strong>{registeredEmail}</strong>
                                 </p>
@@ -199,7 +199,7 @@ const RegisterPage = () => {
                                     label="Mã OTP (6 chữ số)"
                                     name="otp"
                                     rules={[
-                                        { required: true, message: 'Vui lòng nhập mã OTP!' },
+                                                        <h2 style={{ textAlign: "center", marginBottom: "24px", color: "#0f766e" }}>
                                         { len: 6, message: 'Mã OTP gồm 6 chữ số!' },
                                         { pattern: /^\d+$/, message: 'Mã OTP chỉ gồm chữ số!' }
                                     ]}
@@ -208,7 +208,7 @@ const RegisterPage = () => {
                                         prefix={<SafetyCertificateOutlined style={{ color: '#bbb' }} />}
                                         placeholder="Nhập mã OTP 6 chữ số"
                                         maxLength={6}
-                                        size="large"
+                                                                    <MailOutlined style={{ fontSize: 32, color: "#0f766e", marginBottom: 8 }} />
                                         style={{ textAlign: "center", letterSpacing: "6px", fontSize: "20px" }}
                                     />
                                 </Form.Item>
@@ -217,9 +217,9 @@ const RegisterPage = () => {
                                     type="primary"
                                     htmlType="submit"
                                     block
-                                    size="large"
+                                                                    <Button
                                     loading={loading}
-                                    style={{ background: "#4f46e5", borderColor: "#4f46e5", marginBottom: 10 }}
+                                    style={{ background: "#0f766e", borderColor: "#0f766e", marginBottom: 10 }}
                                 >
                                     Xác nhận OTP
                                 </Button>

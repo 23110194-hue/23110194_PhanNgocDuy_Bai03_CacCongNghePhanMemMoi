@@ -1,10 +1,16 @@
 require("dotenv").config();
 const jwt = require("jsonwebtoken");
 
-const WHITE_LIST = ["/", "/register", "/login", "/verify-register", "/forgot-password", "/verify-forgot-password"];
+const WHITE_LIST = ["/", "/register", "/login", "/verify-register", "/forgot-password", "/verify-forgot-password", "/products"];
 
 const auth = (req, res, next) => {
-    if (WHITE_LIST.find(item => '/v1/api' + item === req.originalUrl)) {
+    const isPublic = WHITE_LIST.some((item) => {
+        const baseUrl = req.originalUrl.split('?')[0];
+        if (item === "/") return baseUrl === "/v1/api" || baseUrl === "/v1/api/";
+        return baseUrl === `/v1/api${item}` || baseUrl.startsWith(`/v1/api${item}/`);
+    });
+
+    if (isPublic) {
         return next();
     }
 

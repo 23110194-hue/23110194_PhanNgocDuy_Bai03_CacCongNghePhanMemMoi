@@ -17,19 +17,19 @@ const UserProfile = () => {
     if (appLoading) return null;
 
     return (
-        <div style={{ padding: "40px 20px", minHeight: "calc(100vh - 64px)", background: "#f5f5ff" }}>
+        <div style={{ padding: "40px 20px", minHeight: "calc(100vh - 64px)", background: "#f7f2ea" }}>
             <Row justify="center">
                 <Col xs={24} md={16} lg={10}>
                     <Card
                         style={{
                             borderRadius: 16,
-                            boxShadow: "0 8px 32px rgba(79,70,229,0.12)",
+                            boxShadow: "0 8px 32px rgba(15,118,110,0.12)",
                             overflow: "hidden",
                         }}
                         bodyStyle={{ padding: 0 }}
                     >
                         <div style={{
-                            background: "linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%)",
+                            background: "linear-gradient(135deg, #0f172a 0%, #0f766e 100%)",
                             padding: "40px 30px",
                             textAlign: "center",
                             color: "#fff",
@@ -52,7 +52,7 @@ const UserProfile = () => {
                                 display: "flex", alignItems: "center", gap: 12,
                                 padding: "14px 0", borderBottom: "1px solid #f0f0f0"
                             }}>
-                                <MailOutlined style={{ color: "#4f46e5", fontSize: 18 }} />
+                                <MailOutlined style={{ color: "#0f766e", fontSize: 18 }} />
                                 <div>
                                     <div style={{ fontSize: 12, color: "#999" }}>Email</div>
                                     <div style={{ fontWeight: 500 }}>{auth.user?.email}</div>
@@ -62,11 +62,11 @@ const UserProfile = () => {
                                 display: "flex", alignItems: "center", gap: 12,
                                 padding: "14px 0",
                             }}>
-                                <UserOutlined style={{ color: "#4f46e5", fontSize: 18 }} />
+                                <UserOutlined style={{ color: "#0f766e", fontSize: 18 }} />
                                 <div>
                                     <div style={{ fontSize: 12, color: "#999" }}>Vai trò</div>
                                     <div>
-                                        <Tag color="blue">User</Tag>
+                                        <Tag color="green">User</Tag>
                                     </div>
                                 </div>
                             </div>
@@ -77,7 +77,7 @@ const UserProfile = () => {
                                 size="large"
                                 onClick={() => navigate('/')}
                                 style={{
-                                    background: "#4f46e5", borderColor: "#4f46e5",
+                                    background: "#0f766e", borderColor: "#0f766e",
                                     marginTop: 16, borderRadius: 8
                                 }}
                             >

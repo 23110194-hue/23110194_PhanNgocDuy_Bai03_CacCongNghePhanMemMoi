@@ -24,6 +24,12 @@ const getUserProfileApi = () =>
 const getAdminProfileApi = () =>
     axios.get("/v1/api/admin/profile");
 
+const getProductsApi = (params) =>
+    axios.get("/v1/api/products", { params });
+
+const getProductDetailApi = (slug) =>
+    axios.get(`/v1/api/products/${slug}`);
+
 export {
     createUserApi,
     verifyRegisterOTPApi,
@@ -33,4 +39,6 @@ export {
     getUserApi,
     getUserProfileApi,
     getAdminProfileApi,
+    getProductsApi,
+    getProductDetailApi,
 };
