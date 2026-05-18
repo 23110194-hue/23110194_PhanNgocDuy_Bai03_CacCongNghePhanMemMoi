@@ -28,7 +28,7 @@ function App() {
   }, [])
 
   return (
-    <div>
+    <div className="w-full min-h-screen flex flex-col">
       {appLoading === true ? (
         <div style={{
           position: "fixed",
@@ -41,10 +41,10 @@ function App() {
       ) : (
         <>
           <Header />
-          <main className="min-h-[calc(100vh-64px)]">
+          <main className="flex-1 w-full">
             <Outlet />
           </main>
-          <footer className="bg-slate-900 text-slate-300 py-12 mt-16">
+          <footer className="bg-slate-900 text-slate-300 py-12 mt-auto w-full">
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 grid grid-cols-1 md:grid-cols-3 gap-8">
               <div>
                 <h3 className="text-xl font-bold text-white mb-4 flex items-center gap-2">

@@ -11,6 +11,7 @@ const products = [
         isHot: true,
         stock: 24,
         sold: 380,
+        views: 1250,
         publishedAt: "2022-07-10",
         description: "Cuốn sách kinh điển về tâm lý hành vi và ra quyết định.",
         images: [
@@ -32,6 +33,7 @@ const products = [
         isHot: true,
         stock: 80,
         sold: 920,
+        views: 3100,
         publishedAt: "2019-05-18",
         description: "Hành trình tìm kho báu và ý nghĩa cuộc sống.",
         images: [
@@ -53,6 +55,7 @@ const products = [
         isHot: false,
         stock: 35,
         sold: 210,
+        views: 890,
         publishedAt: "2024-01-20",
         description: "Tư duy linh hoạt để thích nghi và bứt phá.",
         images: [
@@ -74,6 +77,7 @@ const products = [
         isHot: true,
         stock: 12,
         sold: 480,
+        views: 1560,
         publishedAt: "2021-09-12",
         description: "Tạo ra không gian thị trường mới và lợi thế cạnh tranh.",
         images: [
@@ -95,6 +99,7 @@ const products = [
         isHot: false,
         stock: 50,
         sold: 160,
+        views: 450,
         publishedAt: "2024-03-05",
         description: "Lan tỏa giá trị và dẫn dắt từ chính mình.",
         images: [
@@ -115,6 +120,7 @@ const products = [
         isHot: true,
         stock: 90,
         sold: 640,
+        views: 2200,
         publishedAt: "2020-11-01",
         description: "Phương pháp học tập chủ động và bền vững.",
         images: [
@@ -136,6 +142,7 @@ const products = [
         isHot: false,
         stock: 8,
         sold: 120,
+        views: 340,
         publishedAt: "2023-06-15",
         description: "Rèn luyện kỹ năng cốt lõi để thăng tiến.",
         images: [
@@ -156,6 +163,7 @@ const products = [
         isHot: true,
         stock: 150,
         sold: 1100,
+        views: 4500,
         publishedAt: "2024-02-10",
         description: "Cuộc phiêu lưu vui nhộn dành cho thiếu nhi.",
         images: [
@@ -176,6 +184,7 @@ const products = [
         isHot: true,
         stock: 28,
         sold: 520,
+        views: 1800,
         publishedAt: "2020-08-22",
         description: "Quản lý thời gian và năng suất hiệu quả.",
         images: [
@@ -197,6 +206,7 @@ const products = [
         isHot: false,
         stock: 16,
         sold: 140,
+        views: 520,
         publishedAt: "2024-04-12",
         description: "Xây dựng văn hóa dịch vụ lấy khách hàng làm trung tâm.",
         images: [

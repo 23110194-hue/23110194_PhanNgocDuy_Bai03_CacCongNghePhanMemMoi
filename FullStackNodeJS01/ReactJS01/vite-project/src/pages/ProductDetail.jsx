@@ -59,10 +59,10 @@ const ProductDetail = () => {
         return (
             <div className="min-h-screen flex flex-col items-center justify-center px-4">
                 <Package className="w-24 h-24 text-slate-300 mb-6" />
-                <h2 className="font-display text-2xl font-semibold text-slate-900 mb-2">Khong tim thay san pham</h2>
-                <p className="text-slate-500 mb-6 text-center max-w-md">San pham nay khong ton tai hoac da bi xoa khoi he thong.</p>
+                <h2 className="font-display text-2xl font-semibold text-slate-900 mb-2">Không tìm thấy sản phẩm</h2>
+                <p className="text-slate-500 mb-6 text-center max-w-md">Sản phẩm này không tồn tại hoặc đã bị xóa khỏi hệ thống.</p>
                 <Link to="/products" className="btn-primary">
-                    Tiep tuc mua sam
+                    Tiếp tục mua sắm
                 </Link>
             </div>
         );
@@ -74,7 +74,7 @@ const ProductDetail = () => {
                 <nav className="flex text-sm text-slate-500 mb-8" aria-label="Breadcrumb">
                     <ol className="inline-flex items-center space-x-1 md:space-x-3">
                         <li className="inline-flex items-center">
-                            <Link to="/" className="hover:text-slate-900">Trang chu</Link>
+                            <Link to="/" className="hover:text-slate-900">Trang chủ</Link>
                         </li>
                         <li>
                             <div className="flex items-center">
@@ -111,7 +111,7 @@ const ProductDetail = () => {
 
                                 <div className="absolute top-4 left-4 z-10 flex flex-col gap-2">
                                     {product.isNew && (
-                                        <span className="bg-emerald-100 text-emerald-700 text-xs font-bold px-3 py-1.5 rounded-full uppercase tracking-wider">Moi</span>
+                                        <span className="bg-emerald-100 text-emerald-700 text-xs font-bold px-3 py-1.5 rounded-full uppercase tracking-wider">Mới</span>
                                     )}
                                     {product.hasDiscount && (
                                         <span className="bg-amber-100 text-amber-700 text-xs font-bold px-3 py-1.5 rounded-full">-{product.discountPercent}%</span>
@@ -150,14 +150,14 @@ const ProductDetail = () => {
                                 {product.title}
                             </h1>
                             <div className="text-lg text-slate-500 mb-8 flex items-center gap-2">
-                                <span>Tac gia:</span>
+                                <span>Tác giả:</span>
                                 <span className="font-semibold text-slate-900 bg-slate-100 px-3 py-1 rounded-md">{product.author}</span>
                             </div>
 
                             <div className="bg-slate-50 rounded-2xl p-6 lg:p-8 mb-8 border border-slate-100">
                                 <div className="flex flex-col sm:flex-row sm:items-center gap-6 sm:gap-12">
                                     <div>
-                                        <div className="text-sm text-slate-500 font-medium mb-1">Gia san pham</div>
+                                        <div className="text-sm text-slate-500 font-medium mb-1">Giá sản phẩm</div>
                                         <div className="flex items-baseline gap-3">
                                             <div className="text-4xl font-black text-slate-900 tracking-tight">
                                                 {new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(product.finalPrice)}
@@ -175,13 +175,13 @@ const ProductDetail = () => {
                                     <div className="flex flex-row sm:flex-col gap-4 sm:gap-2">
                                         <div className="flex items-center gap-2 text-sm font-medium text-slate-600 bg-white px-3 py-2 rounded-lg shadow-sm border border-slate-100">
                                             <CheckCircle className="w-4 h-4 text-emerald-500" />
-                                            <span>Da ban: <strong className="text-slate-900">{product.sold}</strong></span>
+                                            <span>Đã bán: <strong className="text-slate-900">{product.sold}</strong></span>
                                         </div>
                                         <div className="flex items-center gap-2 text-sm font-medium text-slate-600 bg-white px-3 py-2 rounded-lg shadow-sm border border-slate-100">
                                             {product.stock > 0 ? (
-                                                <><Package className="w-4 h-4 text-slate-600" /> <span>Ton kho: <strong className="text-slate-900">{product.stock}</strong></span></>
+                                                <><Package className="w-4 h-4 text-slate-600" /> <span>Tồn kho: <strong className="text-slate-900">{product.stock}</strong></span></>
                                             ) : (
-                                                <><AlertTriangle className="w-4 h-4 text-rose-500" /> <span className="text-rose-600 font-bold">Het hang</span></>
+                                                <><AlertTriangle className="w-4 h-4 text-rose-500" /> <span className="text-rose-600 font-bold">Hết hàng</span></>
                                             )}
                                         </div>
                                     </div>
@@ -189,7 +189,7 @@ const ProductDetail = () => {
                             </div>
 
                             <div className="mb-10">
-                                <h3 className="font-display text-xl font-semibold text-slate-900 mb-4">Mo ta san pham</h3>
+                                <h3 className="font-display text-xl font-semibold text-slate-900 mb-4">Mô tả sản phẩm</h3>
                                 <p className="text-slate-600 leading-relaxed text-lg">
                                     {product.description}
                                 </p>
@@ -233,7 +233,7 @@ const ProductDetail = () => {
                                     className="flex-1 btn-primary justify-center h-14 text-lg font-semibold disabled:bg-slate-300 disabled:shadow-none"
                                 >
                                     <ShoppingCart className="w-6 h-6" />
-                                    {product.stock > 0 ? "Them vao gio hang" : "Tam het hang"}
+                                    {product.stock > 0 ? "Thêm vào giỏ hàng" : "Tạm hết hàng"}
                                 </button>
                             </div>
                         </div>
@@ -244,7 +244,7 @@ const ProductDetail = () => {
                     <div>
                         <h2 className="font-display text-2xl font-semibold text-slate-900 mb-6 flex items-center gap-2">
                             <Sparkles className="w-6 h-6 text-amber-600" />
-                            San pham cung the loai
+                            Sản phẩm cùng thể loại
                         </h2>
                         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
                             {similarProducts.map(item => (

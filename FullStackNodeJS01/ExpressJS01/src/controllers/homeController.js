@@ -63,6 +63,7 @@ const sortProducts = (items, sort) => {
     if (sort === "price-desc") list.sort((a, b) => b.finalPrice - a.finalPrice);
     if (sort === "best") list.sort((a, b) => b.sold - a.sold);
     if (sort === "newest") list.sort((a, b) => new Date(b.publishedAt) - new Date(a.publishedAt));
+    if (sort === "viewed") list.sort((a, b) => (b.views || 0) - (a.views || 0));
     return list;
 };
 
@@ -127,9 +128,19 @@ const apiGetProducts = async (req, res) => {
     const decorated = products.map(decorateProduct);
     const { filters, numbers } = parseFilters(req.query);
     const filtered = sortProducts(applyFilters(decorated, filters, numbers), filters.sort);
+    
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || filtered.length;
+    const startIndex = (page - 1) * limit;
+    const endIndex = page * limit;
+    const paginatedItems = filtered.slice(startIndex, endIndex);
+
     return res.status(200).json({
         total: filtered.length,
-        items: filtered,
+        page,
+        limit,
+        totalPages: Math.ceil(filtered.length / limit),
+        items: paginatedItems,
         filters,
     });
 };

@@ -1,14 +1,19 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback, useRef } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { getProductsApi } from '../util/api';
 import ProductCard from '../components/ProductCard';
-import { Filter, SlidersHorizontal, SearchX } from 'lucide-react';
+import { Filter, SlidersHorizontal, SearchX, Loader2 } from 'lucide-react';
 
 const Products = () => {
     const [searchParams, setSearchParams] = useSearchParams();
     const [products, setProducts] = useState([]);
     const [loading, setLoading] = useState(true);
+    const [loadingMore, setLoadingMore] = useState(false);
     const [total, setTotal] = useState(0);
+    
+    const [page, setPage] = useState(1);
+    const [hasMore, setHasMore] = useState(true);
+    const observer = useRef();
 
     const [q, setQ] = useState(searchParams.get('q') || '');
     const [category, setCategory] = useState(searchParams.get('category') || 'all');
@@ -26,25 +31,58 @@ const Products = () => {
         setInStock(searchParams.get('inStock') === 'true');
         setPromo(searchParams.get('promo') === 'true');
         setSort(searchParams.get('sort') || 'newest');
+        
+        setPage(1);
+        setProducts([]);
+        setHasMore(true);
+    }, [searchParams]);
 
+    useEffect(() => {
+        let isSubscribed = true;
         const fetchProducts = async () => {
-            setLoading(true);
+            if (page === 1) setLoading(true);
+            else setLoadingMore(true);
             try {
                 const params = Object.fromEntries([...searchParams]);
+                params.page = page;
+                params.limit = 4; 
                 const res = await getProductsApi(params);
-                if (res && res.items) {
-                    setProducts(res.items);
+                if (isSubscribed && res && res.items) {
+                    if (page === 1) {
+                        setProducts(res.items);
+                    } else {
+                        setProducts(prev => [...prev, ...res.items]);
+                    }
                     setTotal(res.total);
+                    setHasMore(page < res.totalPages);
                 }
             } catch (error) {
                 console.error("Error fetching products:", error);
             } finally {
-                setLoading(false);
+                if (isSubscribed) {
+                    setLoading(false);
+                    setLoadingMore(false);
+                }
             }
         };
 
         fetchProducts();
-    }, [searchParams]);
+        
+        return () => {
+            isSubscribed = false;
+        };
+    }, [searchParams, page]);
+
+    const lastProductElementRef = useCallback(node => {
+        if (loading || loadingMore) return;
+        if (observer.current) observer.current.disconnect();
+        observer.current = new IntersectionObserver(entries => {
+            if (entries[0].isIntersecting && hasMore) {
+                setPage(prevPage => prevPage + 1);
+            }
+        });
+        if (node) observer.current.observe(node);
+    }, [loading, loadingMore, hasMore]);
 
     const handleApplyFilters = (e) => {
         e?.preventDefault();
@@ -59,7 +97,7 @@ const Products = () => {
         setSearchParams(params);
     };
 
-    const categories = ['all', 'Ky nang', 'Tieu thuyet', 'Kinh doanh', 'Giao duc', 'Thieu nhi'];
+    const categories = ['all', 'Kỹ năng', 'Tiểu thuyết', 'Kinh doanh', 'Giáo dục', 'Thiếu nhi'];
 
     return (
         <div className="min-h-screen py-10">
@@ -68,12 +106,12 @@ const Products = () => {
                     <div className="w-full lg:w-72 flex-shrink-0">
                         <div className="surface rounded-3xl p-6 sticky top-24">
                             <h2 className="text-lg font-bold text-slate-900 mb-6 flex items-center gap-2">
-                                <Filter className="w-5 h-5" /> Bo loc
+                                <Filter className="w-5 h-5" /> Bộ lọc
                             </h2>
 
                             <form onSubmit={handleApplyFilters}>
                                 <div className="mb-6">
-                                    <h3 className="text-sm font-semibold text-slate-900 mb-3">Danh muc</h3>
+                                    <h3 className="text-sm font-semibold text-slate-900 mb-3">Danh mục</h3>
                                     <div className="space-y-2">
                                         {categories.map(cat => (
                                             <label key={cat} className="flex items-center gap-2 cursor-pointer group">
@@ -86,7 +124,7 @@ const Products = () => {
                                                     className="w-4 h-4 text-amber-600 focus:ring-amber-500 border-slate-300"
                                                 />
                                                 <span className="text-sm text-slate-600 group-hover:text-slate-900 transition-colors">
-                                                    {cat === 'all' ? 'Tat ca danh muc' : cat}
+                                                    {cat === 'all' ? 'Tất cả danh mục' : cat}
                                                 </span>
                                             </label>
                                         ))}
@@ -94,11 +132,11 @@ const Products = () => {
                                 </div>
 
                                 <div className="mb-6">
-                                    <h3 className="text-sm font-semibold text-slate-900 mb-3">Khoang gia (VND)</h3>
+                                    <h3 className="text-sm font-semibold text-slate-900 mb-3">Khoảng giá (VNĐ)</h3>
                                     <div className="flex items-center gap-2">
                                         <input
                                             type="number"
-                                            placeholder="TU"
+                                            placeholder="TỪ"
                                             value={minPrice}
                                             onChange={(e) => setMinPrice(e.target.value)}
                                             className="form-input text-sm"
@@ -106,7 +144,7 @@ const Products = () => {
                                         <span className="text-slate-400">-</span>
                                         <input
                                             type="number"
-                                            placeholder="DEN"
+                                            placeholder="ĐẾN"
                                             value={maxPrice}
                                             onChange={(e) => setMaxPrice(e.target.value)}
                                             className="form-input text-sm"
@@ -122,7 +160,7 @@ const Products = () => {
                                             onChange={(e) => setInStock(e.target.checked)}
                                             className="w-4 h-4 text-amber-600 rounded focus:ring-amber-500 border-slate-300"
                                         />
-                                        <span className="text-sm text-slate-600 group-hover:text-slate-900">Chi hang con trong kho</span>
+                                        <span className="text-sm text-slate-600 group-hover:text-slate-900">Chỉ hàng còn trong kho</span>
                                     </label>
                                     <label className="flex items-center gap-2 cursor-pointer group">
                                         <input
@@ -131,12 +169,12 @@ const Products = () => {
                                             onChange={(e) => setPromo(e.target.checked)}
                                             className="w-4 h-4 text-amber-600 rounded focus:ring-amber-500 border-slate-300"
                                         />
-                                        <span className="text-sm text-slate-600 group-hover:text-slate-900">Dang co khuyen mai</span>
+                                        <span className="text-sm text-slate-600 group-hover:text-slate-900">Đang có khuyến mãi</span>
                                     </label>
                                 </div>
 
                                 <button type="submit" className="btn-primary w-full justify-center">
-                                    Ap dung bo loc
+                                    Áp dụng bộ lọc
                                 </button>
                             </form>
                         </div>
@@ -147,15 +185,15 @@ const Products = () => {
                             <div className="text-sm text-slate-600">
                                 {q && (
                                     <span>
-                                        Ket qua tim kiem cho <span className="font-bold text-slate-900">"{q}"</span> -{' '}
+                                        Kết quả tìm kiếm cho <span className="font-bold text-slate-900">"{q}"</span> -{' '}
                                     </span>
                                 )}
-                                Hien thi <span className="font-bold text-slate-900">{total}</span> san pham
+                                Hiển thị <span className="font-bold text-slate-900">{total}</span> sản phẩm
                             </div>
 
                             <div className="flex items-center gap-2">
                                 <SlidersHorizontal className="w-4 h-4 text-slate-400" />
-                                <span className="text-sm font-medium text-slate-700">Sap xep:</span>
+                                <span className="text-sm font-medium text-slate-700">Sắp xếp:</span>
                                 <select
                                     value={sort}
                                     onChange={(e) => {
@@ -166,38 +204,54 @@ const Products = () => {
                                     }}
                                     className="form-select text-sm"
                                 >
-                                    <option value="newest">Moi nhat</option>
-                                    <option value="best">Ban chay nhat</option>
-                                    <option value="price-asc">Gia: Thap den Cao</option>
-                                    <option value="price-desc">Gia: Cao den Thap</option>
+                                    <option value="newest">Mới nhất</option>
+                                    <option value="best">Bán chạy nhất</option>
+                                    <option value="viewed">Xem nhiều nhất</option>
+                                    <option value="price-asc">Giá: Thấp đến Cao</option>
+                                    <option value="price-desc">Giá: Cao đến Thấp</option>
                                 </select>
                             </div>
                         </div>
 
                         {loading ? (
                             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-                                {[1, 2, 3, 4, 5, 6].map(i => (
+                                {[1, 2, 3, 4].map(i => (
                                     <div key={i} className="animate-pulse bg-white/60 rounded-2xl h-80 border border-slate-200"></div>
                                 ))}
                             </div>
                         ) : products.length > 0 ? (
-                            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-                                {products.map(product => (
-                                    <ProductCard key={product.id} product={product} />
-                                ))}
-                            </div>
+                            <>
+                                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                                    {products.map((product, index) => {
+                                        if (products.length === index + 1) {
+                                            return (
+                                                <div ref={lastProductElementRef} key={product.id}>
+                                                    <ProductCard product={product} />
+                                                </div>
+                                            );
+                                        } else {
+                                            return <ProductCard key={product.id} product={product} />;
+                                        }
+                                    })}
+                                </div>
+                                {loadingMore && (
+                                    <div className="flex justify-center mt-8">
+                                        <Loader2 className="w-8 h-8 animate-spin text-amber-600" />
+                                    </div>
+                                )}
+                            </>
                         ) : (
                             <div className="surface rounded-3xl p-12 flex flex-col items-center justify-center text-center">
                                 <SearchX className="w-16 h-16 text-slate-300 mb-4" />
-                                <h3 className="text-xl font-bold text-slate-900 mb-2">Khong tim thay san pham nao</h3>
+                                <h3 className="text-xl font-bold text-slate-900 mb-2">Không tìm thấy sản phẩm nào</h3>
                                 <p className="text-slate-500 max-w-md">
-                                    Thu dieu chinh lai bo loc hoac thay doi tu khoa tim kiem de tim thay san pham ban mong muon.
+                                    Thử điều chỉnh lại bộ lọc hoặc thay đổi từ khóa tìm kiếm để tìm thấy sản phẩm bạn mong muốn.
                                 </p>
                                 <button
                                     onClick={() => setSearchParams({})}
                                     className="mt-6 text-slate-700 font-medium hover:text-slate-900"
                                 >
-                                    Xoa tat ca bo loc
+                                    Xóa tất cả bộ lọc
                                 </button>
                             </div>
                         )}

@@ -8,7 +8,7 @@ const ProductCard = ({ product }) => {
             <div className="absolute top-4 left-4 z-10 flex flex-col gap-2">
                 {product.isNew && (
                     <span className="bg-emerald-100 text-emerald-700 text-xs font-bold px-3 py-1 rounded-full shadow-sm">
-                        MOI
+                        MỚI
                     </span>
                 )}
                 {product.hasDiscount && (

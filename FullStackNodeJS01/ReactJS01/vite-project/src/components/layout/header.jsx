@@ -44,7 +44,7 @@ const Header = () => {
                             <input
                                 type="text"
                                 className="block w-full pl-11 pr-3 py-2 border border-slate-200 rounded-full leading-5 bg-white/70 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-amber-500/40 focus:border-amber-400 sm:text-sm transition"
-                                placeholder="Tim sach, tac gia..."
+                                placeholder="Tìm sách, tác giả..."
                                 value={searchTerm}
                                 onChange={(e) => setSearchTerm(e.target.value)}
                             />
@@ -53,7 +53,7 @@ const Header = () => {
 
                     <div className="flex items-center gap-5">
                         <Link to="/products" className="text-slate-500 hover:text-slate-900 font-medium transition-colors">
-                            Tat ca sach
+                            Tất cả sách
                         </Link>
 
                         <div className="relative cursor-pointer text-slate-500 hover:text-slate-900 transition-colors">
@@ -73,7 +73,7 @@ const Header = () => {
                                                 <Crown className="w-3 h-3" /> Admin
                                             </span>
                                         ) : (
-                                            <span className="text-xs text-emerald-600 font-semibold">Thanh vien</span>
+                                            <span className="text-xs text-emerald-600 font-semibold">Thành viên</span>
                                         )}
                                     </div>
                                     <div className="h-10 w-10 rounded-full bg-amber-100 flex items-center justify-center text-slate-900 font-bold border border-amber-200 cursor-pointer">
@@ -82,28 +82,28 @@ const Header = () => {
 
                                     <div className="absolute right-0 top-full mt-3 w-48 bg-white rounded-xl shadow-lg py-2 ring-1 ring-black/5 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200">
                                         <Link to={profileUrl} className="block px-4 py-2 text-sm text-slate-700 hover:bg-slate-100 flex items-center gap-2">
-                                            <User className="w-4 h-4" /> Ho so cua toi
+                                            <User className="w-4 h-4" /> Hồ sơ của tôi
                                         </Link>
                                         {auth.user.role === 'admin' && (
                                             <Link to="/user" className="block px-4 py-2 text-sm text-slate-700 hover:bg-slate-100 flex items-center gap-2">
-                                                <Package className="w-4 h-4" /> Quan ly Users
+                                                <Package className="w-4 h-4" /> Quản lý Users
                                             </Link>
                                         )}
                                         <button
                                             onClick={handleLogout}
                                             className="block w-full text-left px-4 py-2 text-sm text-rose-600 hover:bg-slate-100 flex items-center gap-2"
                                         >
-                                            <LogOut className="w-4 h-4" /> Dang xuat
+                                            <LogOut className="w-4 h-4" /> Đăng xuất
                                         </button>
                                     </div>
                                 </div>
                             ) : (
                                 <div className="flex items-center gap-3">
                                     <Link to="/login" className="text-slate-500 hover:text-slate-900 font-medium transition-colors">
-                                        Dang nhap
+                                        Đăng nhập
                                     </Link>
                                     <Link to="/register" className="btn-primary">
-                                        Dang ky
+                                        Đăng ký
                                     </Link>
                                 </div>
                             )}
