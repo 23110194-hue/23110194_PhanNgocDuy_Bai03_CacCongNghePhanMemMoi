@@ -1,114 +1,197 @@
 import React, { useContext, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { AuthContext } from '../context/auth.context';
-import { Search, ShoppingCart, User, LogOut, Package, Crown } from 'lucide-react';
+import { CartContext } from '../context/cart.context';
+import { Search, ShoppingCart, User, LogOut, Package, Crown, Truck, ChevronDown } from 'lucide-react';
 
 const Header = () => {
     const navigate = useNavigate();
     const { auth, setAuth } = useContext(AuthContext);
+    const { cart } = useContext(CartContext);
     const [searchTerm, setSearchTerm] = useState('');
+    const [menuOpen, setMenuOpen] = useState(false);
+
+    const cartCount = cart?.summary?.totalQuantity || 0;
 
     const handleSearch = (e) => {
         e.preventDefault();
-        if (searchTerm.trim()) {
-            navigate(`/products?q=${encodeURIComponent(searchTerm)}`);
-        }
+        if (searchTerm.trim()) navigate(`/products?q=${encodeURIComponent(searchTerm)}`);
     };
 
     const handleLogout = () => {
-        localStorage.clear("access_token");
-        setAuth({ isAuthenticated: false, user: { email: "", name: "", role: "" } });
-        navigate("/");
+        localStorage.removeItem('access_token');
+        setAuth({ isAuthenticated: false, user: { id: '', email: '', name: '', role: '' } });
+        window.location.href = '/';
     };
 
-    const profileUrl = auth?.user?.role === 'admin' ? '/admin/profile' : '/user/profile';
+    const profileByRole = { admin: '/admin/profile', vendor: '/vendor/shop', manager: '/manager/vendors', user: '/user/profile' };
+    const profileUrl = profileByRole[auth?.user?.role] || '/user/profile';
 
     return (
-        <header className="bg-white/80 backdrop-blur border-b border-slate-200/60 sticky top-0 z-50">
-            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                <div className="flex justify-between items-center h-16">
-                    <div className="flex-shrink-0 flex items-center">
-                        <Link to="/" className="flex items-center gap-2">
-                            <div className="h-10 w-10 rounded-2xl bg-slate-900 text-white flex items-center justify-center font-bold">
-                                BK
-                            </div>
-                            <span className="font-display text-xl text-slate-900">BookStore</span>
+        <header>
+            {/* ── Top bar ── */}
+            <div style={{ background: '#fff', borderBottom: '1px solid #e5e7eb' }}>
+                <div className="container" style={{ display: 'flex', alignItems: 'center', gap: 16, height: 64 }}>
+                    {/* Logo */}
+                    <Link to="/" style={{ display: 'flex', alignItems: 'center', gap: 8, flexShrink: 0 }}>
+                        <div style={{
+                            width: 36, height: 36, borderRadius: 8,
+                            background: '#f97316', color: '#fff',
+                            display: 'flex', alignItems: 'center', justifyContent: 'center',
+                            fontWeight: 700, fontSize: 14
+                        }}>BK</div>
+                        <span style={{ fontWeight: 700, fontSize: 18, color: '#1a1a1a' }}>BookStore</span>
+                    </Link>
+
+                    {/* Search bar */}
+                    <form onSubmit={handleSearch} style={{ flex: 1, maxWidth: 520, position: 'relative' }}>
+                        <input
+                            type="text"
+                            placeholder="Tìm kiếm sách, tác giả..."
+                            value={searchTerm}
+                            onChange={e => setSearchTerm(e.target.value)}
+                            style={{
+                                width: '100%', height: 40,
+                                border: '2px solid #f97316', borderRadius: 6,
+                                padding: '0 44px 0 14px', fontSize: 14,
+                                outline: 'none', color: '#1a1a1a'
+                            }}
+                        />
+                        <button type="submit" style={{
+                            position: 'absolute', right: 0, top: 0,
+                            width: 40, height: 40, border: 'none',
+                            background: '#f97316', borderRadius: '0 6px 6px 0',
+                            cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center'
+                        }}>
+                            <Search style={{ width: 18, height: 18, color: '#fff' }} />
+                        </button>
+                    </form>
+
+                    {/* Right icons */}
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 20, marginLeft: 'auto' }}>
+                        {/* Cart */}
+                        <Link to="/cart" style={{ position: 'relative', color: '#4b5563', display: 'flex', alignItems: 'center', gap: 6 }}>
+                            <ShoppingCart style={{ width: 22, height: 22 }} />
+                            <span style={{ fontSize: 13, fontWeight: 500, display: 'none' }}>Giỏ hàng</span>
+                            {cartCount > 0 && (
+                                <span style={{
+                                    position: 'absolute', top: -8, right: -10,
+                                    background: '#f97316', color: '#fff',
+                                    fontSize: 11, fontWeight: 700,
+                                    width: 18, height: 18, borderRadius: '50%',
+                                    display: 'flex', alignItems: 'center', justifyContent: 'center'
+                                }}>{cartCount}</span>
+                            )}
                         </Link>
-                    </div>
 
-                    <div className="flex-1 max-w-2xl px-6 hidden md:block">
-                        <form onSubmit={handleSearch} className="relative">
-                            <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                                <Search className="h-5 w-5 text-slate-400" />
-                            </div>
-                            <input
-                                type="text"
-                                className="block w-full pl-11 pr-3 py-2 border border-slate-200 rounded-full leading-5 bg-white/70 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-amber-500/40 focus:border-amber-400 sm:text-sm transition"
-                                placeholder="Tìm sách, tác giả..."
-                                value={searchTerm}
-                                onChange={(e) => setSearchTerm(e.target.value)}
-                            />
-                        </form>
-                    </div>
-
-                    <div className="flex items-center gap-5">
-                        <Link to="/products" className="text-slate-500 hover:text-slate-900 font-medium transition-colors">
-                            Tất cả sách
-                        </Link>
-
-                        <div className="relative cursor-pointer text-slate-500 hover:text-slate-900 transition-colors">
-                            <ShoppingCart className="h-6 w-6" />
-                            <span className="absolute -top-1 -right-1 bg-amber-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center font-bold">0</span>
-                        </div>
-
-                        <div className="relative group">
-                            {auth.isAuthenticated ? (
-                                <div className="flex items-center gap-3">
-                                    <div className="flex flex-col items-end hidden sm:flex">
-                                        <span className="text-sm font-medium text-slate-900">
-                                            {auth.user.name || auth.user.email.split('@')[0]}
-                                        </span>
-                                        {auth.user.role === 'admin' ? (
-                                            <span className="text-xs text-rose-600 font-semibold flex items-center gap-1">
-                                                <Crown className="w-3 h-3" /> Admin
-                                            </span>
-                                        ) : (
-                                            <span className="text-xs text-emerald-600 font-semibold">Thành viên</span>
-                                        )}
-                                    </div>
-                                    <div className="h-10 w-10 rounded-full bg-amber-100 flex items-center justify-center text-slate-900 font-bold border border-amber-200 cursor-pointer">
+                        {/* User */}
+                        {auth.isAuthenticated ? (
+                            <div style={{ position: 'relative' }} onMouseEnter={() => setMenuOpen(true)} onMouseLeave={() => setMenuOpen(false)}>
+                                <button style={{
+                                    display: 'flex', alignItems: 'center', gap: 6,
+                                    background: 'none', border: 'none', cursor: 'pointer',
+                                    fontSize: 13, color: '#1a1a1a', fontWeight: 500
+                                }}>
+                                    <div style={{
+                                        width: 32, height: 32, borderRadius: '50%',
+                                        background: '#f97316', color: '#fff',
+                                        display: 'flex', alignItems: 'center', justifyContent: 'center',
+                                        fontWeight: 700, fontSize: 13
+                                    }}>
                                         {(auth.user.name || auth.user.email).charAt(0).toUpperCase()}
                                     </div>
+                                    <span style={{ maxWidth: 100, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                                        {auth.user.name || auth.user.email.split('@')[0]}
+                                    </span>
+                                    <ChevronDown style={{ width: 14, height: 14 }} />
+                                </button>
 
-                                    <div className="absolute right-0 top-full mt-3 w-48 bg-white rounded-xl shadow-lg py-2 ring-1 ring-black/5 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200">
-                                        <Link to={profileUrl} className="block px-4 py-2 text-sm text-slate-700 hover:bg-slate-100 flex items-center gap-2">
-                                            <User className="w-4 h-4" /> Hồ sơ của tôi
-                                        </Link>
-                                        {auth.user.role === 'admin' && (
-                                            <Link to="/user" className="block px-4 py-2 text-sm text-slate-700 hover:bg-slate-100 flex items-center gap-2">
-                                                <Package className="w-4 h-4" /> Quản lý Users
+                                {menuOpen && (
+                                    <div style={{
+                                        position: 'absolute', right: 0, top: '100%',
+                                        width: 200, background: '#fff',
+                                        border: '1px solid #e5e7eb', borderRadius: 8,
+                                        boxShadow: '0 4px 20px rgba(0,0,0,0.12)',
+                                        zIndex: 100, paddingTop: 4, paddingBottom: 4
+                                    }}>
+                                        {[
+                                            { to: profileUrl, label: 'Hồ sơ của tôi', icon: User },
+                                            { to: '/orders', label: 'Đơn hàng', icon: Package },
+                                            { to: '/favorites', label: 'Yêu thích', icon: Package },
+                                        ].map(item => (
+                                            <Link key={item.to} to={item.to} style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '9px 16px', fontSize: 13, color: '#374151' }}
+                                                onMouseEnter={e => e.currentTarget.style.background = '#f9fafb'}
+                                                onMouseLeave={e => e.currentTarget.style.background = 'transparent'}>
+                                                <item.icon style={{ width: 14, height: 14 }} />
+                                                {item.label}
+                                            </Link>
+                                        ))}
+                                        {auth.user.role === 'vendor' && (
+                                            <Link to="/vendor/shop" style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '9px 16px', fontSize: 13, color: '#374151' }}
+                                                onMouseEnter={e => e.currentTarget.style.background = '#f9fafb'}
+                                                onMouseLeave={e => e.currentTarget.style.background = 'transparent'}>
+                                                <Package style={{ width: 14, height: 14 }} /> Quản lý Shop
                                             </Link>
                                         )}
-                                        <button
-                                            onClick={handleLogout}
-                                            className="block w-full text-left px-4 py-2 text-sm text-rose-600 hover:bg-slate-100 flex items-center gap-2"
-                                        >
-                                            <LogOut className="w-4 h-4" /> Đăng xuất
+                                        {auth.user.role === 'manager' && (
+                                            <Link to="/manager/vendors" style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '9px 16px', fontSize: 13, color: '#374151' }}
+                                                onMouseEnter={e => e.currentTarget.style.background = '#f9fafb'}
+                                                onMouseLeave={e => e.currentTarget.style.background = 'transparent'}>
+                                                <Crown style={{ width: 14, height: 14 }} /> Quản lý Vendor
+                                            </Link>
+                                        )}
+                                        {auth.user.role === 'admin' && (
+                                            <Link to="/admin/profile" style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '9px 16px', fontSize: 13, color: '#374151' }}
+                                                onMouseEnter={e => e.currentTarget.style.background = '#f9fafb'}
+                                                onMouseLeave={e => e.currentTarget.style.background = 'transparent'}>
+                                                <Crown style={{ width: 14, height: 14 }} /> Admin Dashboard
+                                            </Link>
+                                        )}
+                                        <div style={{ borderTop: '1px solid #e5e7eb', margin: '4px 0' }} />
+                                        <button onClick={handleLogout} style={{
+                                            display: 'flex', alignItems: 'center', gap: 8,
+                                            padding: '9px 16px', fontSize: 13, color: '#ef4444',
+                                            background: 'none', border: 'none', cursor: 'pointer', width: '100%'
+                                        }}
+                                            onMouseEnter={e => e.currentTarget.style.background = '#fef2f2'}
+                                            onMouseLeave={e => e.currentTarget.style.background = 'transparent'}>
+                                            <LogOut style={{ width: 14, height: 14 }} /> Đăng xuất
                                         </button>
                                     </div>
-                                </div>
-                            ) : (
-                                <div className="flex items-center gap-3">
-                                    <Link to="/login" className="text-slate-500 hover:text-slate-900 font-medium transition-colors">
-                                        Đăng nhập
-                                    </Link>
-                                    <Link to="/register" className="btn-primary">
-                                        Đăng ký
-                                    </Link>
-                                </div>
-                            )}
-                        </div>
+                                )}
+                            </div>
+                        ) : (
+                            <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                                <Link to="/login" style={{ fontSize: 13, fontWeight: 500, color: '#374151', display: 'flex', alignItems: 'center', gap: 5 }}>
+                                    <User style={{ width: 16, height: 16 }} /> Đăng nhập
+                                </Link>
+                                <Link to="/register" className="btn-primary" style={{ padding: '6px 14px', fontSize: 13 }}>
+                                    Đăng ký
+                                </Link>
+                            </div>
+                        )}
                     </div>
+                </div>
+            </div>
+
+            {/* ── Nav bar (orange) ── */}
+            <div style={{ background: '#f97316' }}>
+                <div className="container" style={{ display: 'flex', alignItems: 'center', height: 40 }}>
+                    <Link to="/products" style={{ color: '#fff', fontWeight: 700, fontSize: 13, padding: '0 16px', borderRight: '1px solid rgba(255,255,255,0.3)', height: '100%', display: 'flex', alignItems: 'center', letterSpacing: '0.04em' }}>
+                        ☰ TẤT CẢ SÁCH
+                    </Link>
+                    {[
+                        { to: '/products?sort=newest', label: 'Sách Mới' },
+                        { to: '/products?sort=best', label: 'Bán Chạy' },
+                        { to: '/products?promo=true', label: 'Khuyến Mãi' },
+                        { to: '/products?sort=viewed', label: 'Xem Nhiều' },
+                    ].map(item => (
+                        <Link key={item.to} to={item.to} style={{ color: '#fff', fontSize: 13, fontWeight: 500, padding: '0 16px', height: '100%', display: 'flex', alignItems: 'center' }}
+                            onMouseEnter={e => e.currentTarget.style.background = 'rgba(0,0,0,0.1)'}
+                            onMouseLeave={e => e.currentTarget.style.background = 'transparent'}>
+                            {item.label}
+                        </Link>
+                    ))}
                 </div>
             </div>
         </header>

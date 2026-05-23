@@ -1,8 +1,12 @@
-import React, { useEffect, useState, useCallback, useRef } from 'react';
+﻿import React, { useEffect, useState, useCallback, useRef } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { getProductsApi } from '../util/api';
 import ProductCard from '../components/ProductCard';
 import { Filter, SlidersHorizontal, SearchX, Loader2 } from 'lucide-react';
+
+const LIMIT = 4;
+
+const categories = ['all', 'Kỹ năng', 'Tiểu thuyết', 'Kinh doanh', 'Giáo dục', 'Thiếu nhi'];
 
 const Products = () => {
     const [searchParams, setSearchParams] = useSearchParams();
@@ -10,7 +14,6 @@ const Products = () => {
     const [loading, setLoading] = useState(true);
     const [loadingMore, setLoadingMore] = useState(false);
     const [total, setTotal] = useState(0);
-    
     const [page, setPage] = useState(1);
     const [hasMore, setHasMore] = useState(true);
     const observer = useRef();
@@ -31,7 +34,6 @@ const Products = () => {
         setInStock(searchParams.get('inStock') === 'true');
         setPromo(searchParams.get('promo') === 'true');
         setSort(searchParams.get('sort') || 'newest');
-        
         setPage(1);
         setProducts([]);
         setHasMore(true);
@@ -43,21 +45,15 @@ const Products = () => {
             if (page === 1) setLoading(true);
             else setLoadingMore(true);
             try {
-                const params = Object.fromEntries([...searchParams]);
-                params.page = page;
-                params.limit = 4; 
+                const params = { ...Object.fromEntries([...searchParams]), page, limit: LIMIT };
                 const res = await getProductsApi(params);
-                if (isSubscribed && res && res.items) {
-                    if (page === 1) {
-                        setProducts(res.items);
-                    } else {
-                        setProducts(prev => [...prev, ...res.items]);
-                    }
+                if (isSubscribed && res?.items) {
+                    setProducts(prev => page === 1 ? res.items : [...prev, ...res.items]);
                     setTotal(res.total);
                     setHasMore(page < res.totalPages);
                 }
             } catch (error) {
-                console.error("Error fetching products:", error);
+                console.error('Error fetching products:', error);
             } finally {
                 if (isSubscribed) {
                     setLoading(false);
@@ -67,10 +63,7 @@ const Products = () => {
         };
 
         fetchProducts();
-        
-        return () => {
-            isSubscribed = false;
-        };
+        return () => { isSubscribed = false; };
     }, [searchParams, page]);
 
     const lastProductElementRef = useCallback(node => {
@@ -78,7 +71,7 @@ const Products = () => {
         if (observer.current) observer.current.disconnect();
         observer.current = new IntersectionObserver(entries => {
             if (entries[0].isIntersecting && hasMore) {
-                setPage(prevPage => prevPage + 1);
+                setPage(prev => prev + 1);
             }
         });
         if (node) observer.current.observe(node);
@@ -97,11 +90,9 @@ const Products = () => {
         setSearchParams(params);
     };
 
-    const categories = ['all', 'Kỹ năng', 'Tiểu thuyết', 'Kinh doanh', 'Giáo dục', 'Thiếu nhi'];
-
     return (
-        <div className="min-h-screen py-10">
-            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div style={{ background: '#f5f6fa', minHeight: '100vh', padding: '24px 0 40px' }}>
+            <div className="container">
                 <div className="flex flex-col lg:flex-row gap-8">
                     <div className="w-full lg:w-72 flex-shrink-0">
                         <div className="surface rounded-3xl p-6 sticky top-24">
@@ -185,7 +176,7 @@ const Products = () => {
                             <div className="text-sm text-slate-600">
                                 {q && (
                                     <span>
-                                        Kết quả tìm kiếm cho <span className="font-bold text-slate-900">"{q}"</span> -{' '}
+                                        Kết quả tìm kiếm cho <span className="font-bold text-slate-900">"{q}"</span>{' '}
                                     </span>
                                 )}
                                 Hiển thị <span className="font-bold text-slate-900">{total}</span> sản phẩm
@@ -223,15 +214,14 @@ const Products = () => {
                             <>
                                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
                                     {products.map((product, index) => {
-                                        if (products.length === index + 1) {
-                                            return (
-                                                <div ref={lastProductElementRef} key={product.id}>
-                                                    <ProductCard product={product} />
-                                                </div>
-                                            );
-                                        } else {
-                                            return <ProductCard key={product.id} product={product} />;
-                                        }
+                                        const isLast = products.length === index + 1;
+                                        return isLast ? (
+                                            <div ref={lastProductElementRef} key={product.id}>
+                                                <ProductCard product={product} />
+                                            </div>
+                                        ) : (
+                                            <ProductCard key={product.id} product={product} />
+                                        );
                                     })}
                                 </div>
                                 {loadingMore && (

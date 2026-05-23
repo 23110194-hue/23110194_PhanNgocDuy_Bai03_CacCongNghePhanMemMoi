@@ -6,6 +6,7 @@ const {
     verifyForgotPasswordOTPService,
     getUserService,
 } = require("../services/userService");
+const User = require('../models/user');
 
 const createUser = async (req, res) => {
     const { name, email, password } = req.body;
@@ -31,7 +32,36 @@ const getUser = async (req, res) => {
 };
 
 const getAccount = async (req, res) => {
-    return res.status(200).json(req.user);
+    if (!req.user) {
+        return res.status(401).json({ message: 'Chưa xác thực' });
+    }
+    // Query DB để lấy role thực tế (JWT có thể đã cũ khi role bị thay đổi trong DB)
+    const user = await User.findById(req.user.id).select('id email name role').lean();
+    if (!user) {
+        return res.status(401).json({ message: 'Người dùng không tồn tại' });
+    }
+    return res.status(200).json({
+        id: user._id,
+        email: user.email,
+        name: user.name,
+        role: user.role,
+    });
+};
+
+const getUserProfile = async (req, res) => {
+    return res.status(200).json({
+        EC: 0,
+        message: "User Profile",
+        user: req.user,
+    });
+};
+
+const getAdminProfile = async (req, res) => {
+    return res.status(200).json({
+        EC: 0,
+        message: "Admin Profile",
+        user: req.user,
+    });
 };
 
 const handleSendForgotPasswordOTP = async (req, res) => {
@@ -52,6 +82,8 @@ module.exports = {
     handleLogin,
     getUser,
     getAccount,
+    getUserProfile,
+    getAdminProfile,
     handleSendForgotPasswordOTP,
     handleVerifyForgotPasswordOTP,
 };

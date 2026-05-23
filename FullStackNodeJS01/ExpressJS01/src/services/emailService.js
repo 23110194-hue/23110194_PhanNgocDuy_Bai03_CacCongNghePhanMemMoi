@@ -56,7 +56,7 @@ const sendOTPEmail = async (email, otp, type) => {
           <p class="note">⏱ Mã OTP có hiệu lực trong <strong>5 phút</strong>. Vui lòng không chia sẻ mã này với bất kỳ ai.</p>
           <p>Nếu bạn không thực hiện thao tác này, hãy bỏ qua email này.</p>
         </div>
-        <div class="footer">© 2025 FullStack App — Phan Ngọc Duy</div>
+        <div class="footer">&copy; 2026 BookStore App — Phan Ngọc Duy</div>
       </div>
     </body>
     </html>

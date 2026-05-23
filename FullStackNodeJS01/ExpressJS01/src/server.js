@@ -6,6 +6,7 @@ const connection = require('./config/database');
 const { getHomepage, getProductDetail } = require('./controllers/homeController');
 const cors = require('cors');
 const User = require('./models/user');
+const { seedProductsIfEmpty } = require('./services/productService');
 
 const app = express();
 const port = process.env.PORT || 8888;
@@ -17,8 +18,8 @@ app.use(express.urlencoded({ extended: true }));
 configViewEngine(app);
 
 const webAPI = express.Router();
-webAPI.get("/", getHomepage);
-webAPI.get("/product/:slug", getProductDetail);
+webAPI.get('/', getHomepage);
+webAPI.get('/product/:slug', getProductDetail);
 app.use('/', webAPI);
 
 app.use('/v1/api/', apiRoutes);
@@ -35,10 +36,12 @@ app.use('/v1/api/', apiRoutes);
             console.log(`>>> Migration: đã kích hoạt ${migrateResult.modifiedCount} user cũ`);
         }
 
+        await seedProductsIfEmpty();
+
         app.listen(port, () => {
-            console.log(`Backend Nodejs App listening on port ${port}`)
-        })
+            console.log(`Backend Nodejs App listening on port ${port}`);
+        });
     } catch (error) {
-        console.log(">>> Error connect to DB: ", error)
+        console.log('>>> Error connect to DB: ', error);
     }
-})()
+})();
