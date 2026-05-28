@@ -19,7 +19,7 @@ function App() {
                         id: res.id ?? '',
                         email: res.email ?? '',
                         name: res.name ?? '',
-                        role: res.role ?? 'user',
+                        role: (res.role ?? 'user').toLowerCase(),
                     },
                 });
             }

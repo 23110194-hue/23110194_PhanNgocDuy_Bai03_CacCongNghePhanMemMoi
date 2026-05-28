@@ -134,7 +134,7 @@ const DashboardLayout = ({
                     }}
                         onMouseEnter={e => e.currentTarget.style.background = '#f9fafb'}
                         onMouseLeave={e => e.currentTarget.style.background = 'transparent'}>
-                        <Home style={{ width: 14, height: 14 }} /> Trang chủ
+                        <Home style={{ width: 14, height: 14 }} /> Xem màn hình khách
                     </Link>
                     <button onClick={onLogout} style={{
                         width: '100%', display: 'flex', alignItems: 'center', gap: 8,

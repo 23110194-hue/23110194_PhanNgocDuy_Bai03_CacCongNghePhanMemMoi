@@ -1,11 +1,24 @@
-﻿import React, { useContext, useEffect, useState } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { CreditCard, MapPin, PackageCheck } from 'lucide-react';
+import { CreditCard, MapPin, PackageCheck, Truck, ShieldCheck, ChevronRight, User, Phone } from 'lucide-react';
 import { notification } from 'antd';
 import { AuthContext } from '../components/context/auth.context';
 import { CartContext } from '../components/context/cart.context';
 import { createOrderApi } from '../util/api';
 import { formatCurrency } from '../util/format';
+
+const inputStyle = {
+    width: '100%',
+    border: '1.5px solid #e5e7eb',
+    borderRadius: 10,
+    padding: '11px 14px',
+    fontSize: 14,
+    outline: 'none',
+    color: '#1a1a1a',
+    background: '#fafafa',
+    transition: 'border-color 0.2s',
+    boxSizing: 'border-box',
+};
 
 const CheckoutPage = () => {
     const navigate = useNavigate();
@@ -19,19 +32,16 @@ const CheckoutPage = () => {
         note: '',
     });
     const [loading, setLoading] = useState(false);
+    const [focusField, setFocusField] = useState(null);
 
     useEffect(() => {
-        if (!auth.isAuthenticated) {
-            navigate('/login');
-            return;
-        }
+        if (!auth.isAuthenticated) { navigate('/login'); return; }
+        if (auth.user?.role !== 'user') { navigate('/'); return; }
         refreshCart(false);
-    }, [auth.isAuthenticated, navigate, refreshCart]);
+    }, [auth.isAuthenticated, auth.user, navigate, refreshCart]);
 
     useEffect(() => {
-        if (!cartLoading && cart.items.length === 0 && auth.isAuthenticated) {
-            navigate('/cart');
-        }
+        if (!cartLoading && cart.items.length === 0 && auth.isAuthenticated) navigate('/cart');
     }, [cart.items.length, auth.isAuthenticated, cartLoading, navigate]);
 
     const handleChange = (e) => {
@@ -49,9 +59,9 @@ const CheckoutPage = () => {
         const res = await createOrderApi(form);
         setLoading(false);
         if (res && !res.message) {
-            notification.success({ message: 'Đặt hàng thành công!' });
+            notification.success({ message: '🎉 Đặt hàng thành công!' });
             await refreshCart();
-            navigate(`/orders/${res._id}`);
+            navigate('/orders');
             return;
         }
         notification.error({ message: 'Đặt hàng thất bại', description: res?.message || 'Vui lòng thử lại.' });
@@ -59,118 +69,261 @@ const CheckoutPage = () => {
 
     if (!auth.isAuthenticated) return null;
 
+    const fieldStyle = (name) => ({
+        ...inputStyle,
+        borderColor: focusField === name ? '#f97316' : '#e5e7eb',
+        background: focusField === name ? '#fff' : '#fafafa',
+    });
+
     return (
-        <div style={{ background: '#f5f6fa', minHeight: '100vh', padding: '24px 0 40px' }}>
+        <div style={{ background: '#f5f6fa', minHeight: '100vh', padding: '28px 0 48px' }}>
             <div className="container">
-                <div className="flex items-center gap-3 mb-8">
-                    <div className="h-12 w-12 rounded-2xl bg-emerald-100 text-emerald-700 flex items-center justify-center">
-                        <PackageCheck className="w-6 h-6" />
-                    </div>
-                    <div>
-                        <h1 className="font-display text-3xl font-semibold text-slate-900">Thanh toán COD</h1>
-                        <p className="text-slate-500">Nhập địa chỉ nhận hàng và xác nhận đơn.</p>
-                    </div>
+
+                {/* ── Progress bar ── */}
+                <div style={{ display: 'flex', alignItems: 'center', gap: 0, marginBottom: 28 }}>
+                    {[
+                        { label: 'Giỏ hàng', done: true },
+                        { label: 'Thanh toán', active: true },
+                        { label: 'Xác nhận', done: false },
+                    ].map((step, i) => (
+                        <React.Fragment key={i}>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                                <div style={{
+                                    width: 28, height: 28, borderRadius: '50%',
+                                    background: step.done ? '#f97316' : step.active ? '#f97316' : '#e5e7eb',
+                                    color: step.done || step.active ? '#fff' : '#9ca3af',
+                                    display: 'flex', alignItems: 'center', justifyContent: 'center',
+                                    fontSize: 13, fontWeight: 700,
+                                }}>{i + 1}</div>
+                                <span style={{
+                                    fontSize: 13, fontWeight: step.active ? 700 : 500,
+                                    color: step.active ? '#f97316' : step.done ? '#374151' : '#9ca3af'
+                                }}>{step.label}</span>
+                            </div>
+                            {i < 2 && (
+                                <div style={{ flex: 1, height: 2, background: step.done ? '#f97316' : '#e5e7eb', margin: '0 12px', maxWidth: 60 }} />
+                            )}
+                        </React.Fragment>
+                    ))}
                 </div>
 
-                <div className="grid lg:grid-cols-[2fr_1fr] gap-6">
-                    <form onSubmit={handleSubmit} className="surface rounded-3xl p-6 space-y-5">
-                        <div className="flex items-center gap-2 text-slate-700 font-semibold">
-                            <MapPin className="w-5 h-5" />
-                            Thông tin giao hàng
-                        </div>
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 360px', gap: 20, alignItems: 'start' }}>
 
-                        <div className="grid md:grid-cols-2 gap-4">
-                            <div>
-                                <label className="text-sm font-medium text-slate-600">Họ và tên</label>
+                    {/* ── LEFT: Form ── */}
+                    <form onSubmit={handleSubmit}>
+
+                        {/* Shipping info card */}
+                        <div style={{ background: '#fff', borderRadius: 14, border: '1px solid #e5e7eb', padding: '24px 28px', marginBottom: 16 }}>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 20 }}>
+                                <div style={{
+                                    width: 36, height: 36, borderRadius: 10,
+                                    background: '#fff7ed', display: 'flex', alignItems: 'center', justifyContent: 'center'
+                                }}>
+                                    <MapPin style={{ width: 18, height: 18, color: '#f97316' }} />
+                                </div>
+                                <div>
+                                    <div style={{ fontWeight: 700, fontSize: 15, color: '#111' }}>Thông tin giao hàng</div>
+                                    <div style={{ fontSize: 12, color: '#9ca3af' }}>Điền chính xác để tránh thất lạc hàng</div>
+                                </div>
+                            </div>
+
+                            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16, marginBottom: 16 }}>
+                                <div>
+                                    <label style={{ display: 'flex', alignItems: 'center', gap: 5, fontSize: 13, fontWeight: 600, color: '#374151', marginBottom: 7 }}>
+                                        <User style={{ width: 13, height: 13, color: '#9ca3af' }} /> Họ và tên *
+                                    </label>
+                                    <input
+                                        type="text" name="fullName" value={form.fullName}
+                                        onChange={handleChange}
+                                        onFocus={() => setFocusField('fullName')}
+                                        onBlur={() => setFocusField(null)}
+                                        style={fieldStyle('fullName')}
+                                        placeholder="Nguyễn Văn A"
+                                    />
+                                </div>
+                                <div>
+                                    <label style={{ display: 'flex', alignItems: 'center', gap: 5, fontSize: 13, fontWeight: 600, color: '#374151', marginBottom: 7 }}>
+                                        <Phone style={{ width: 13, height: 13, color: '#9ca3af' }} /> Số điện thoại *
+                                    </label>
+                                    <input
+                                        type="text" name="phone" value={form.phone}
+                                        onChange={handleChange}
+                                        onFocus={() => setFocusField('phone')}
+                                        onBlur={() => setFocusField(null)}
+                                        style={fieldStyle('phone')}
+                                        placeholder="09xx xxx xxx"
+                                    />
+                                </div>
+                            </div>
+
+                            <div style={{ marginBottom: 16 }}>
+                                <label style={{ display: 'flex', alignItems: 'center', gap: 5, fontSize: 13, fontWeight: 600, color: '#374151', marginBottom: 7 }}>
+                                    <MapPin style={{ width: 13, height: 13, color: '#9ca3af' }} /> Địa chỉ nhận hàng *
+                                </label>
                                 <input
-                                    type="text"
-                                    name="fullName"
-                                    value={form.fullName}
+                                    type="text" name="addressLine" value={form.addressLine}
                                     onChange={handleChange}
-                                    className="form-input mt-2"
-                                    placeholder="Nguyễn Văn A"
+                                    onFocus={() => setFocusField('addressLine')}
+                                    onBlur={() => setFocusField(null)}
+                                    style={fieldStyle('addressLine')}
+                                    placeholder="Số nhà, đường, phường/xã, quận/huyện, tỉnh/thành"
                                 />
                             </div>
+
                             <div>
-                                <label className="text-sm font-medium text-slate-600">Số điện thoại</label>
-                                <input
-                                    type="text"
-                                    name="phone"
-                                    value={form.phone}
+                                <label style={{ fontSize: 13, fontWeight: 600, color: '#374151', marginBottom: 7, display: 'block' }}>
+                                    Ghi chú (tùy chọn)
+                                </label>
+                                <textarea
+                                    name="note" value={form.note}
                                     onChange={handleChange}
-                                    className="form-input mt-2"
-                                    placeholder="09xx xxx xxx"
+                                    onFocus={() => setFocusField('note')}
+                                    onBlur={() => setFocusField(null)}
+                                    style={{ ...fieldStyle('note'), minHeight: 88, resize: 'vertical' }}
+                                    placeholder="Giao giờ hành chính, gọi trước khi giao, để trước cửa..."
                                 />
                             </div>
                         </div>
 
-                        <div>
-                            <label className="text-sm font-medium text-slate-600">Địa chỉ nhận hàng</label>
-                            <input
-                                type="text"
-                                name="addressLine"
-                                value={form.addressLine}
-                                onChange={handleChange}
-                                className="form-input mt-2"
-                                placeholder="Số nhà, đường, quận/huyện, tỉnh/thành"
-                            />
-                        </div>
-
-                        <div>
-                            <label className="text-sm font-medium text-slate-600">Ghi chú</label>
-                            <textarea
-                                name="note"
-                                value={form.note}
-                                onChange={handleChange}
-                                className="form-input mt-2 min-h-24"
-                                placeholder="Giao giờ hành chính, gọi trước khi giao..."
-                            />
-                        </div>
-
-                        <div className="border-t border-slate-200 pt-5">
-                            <div className="flex items-center gap-2 text-slate-700 font-semibold mb-3">
-                                <CreditCard className="w-5 h-5" />
-                                Phương thức thanh toán
+                        {/* Payment card */}
+                        <div style={{ background: '#fff', borderRadius: 14, border: '1px solid #e5e7eb', padding: '24px 28px', marginBottom: 16 }}>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 16 }}>
+                                <div style={{
+                                    width: 36, height: 36, borderRadius: 10,
+                                    background: '#fff7ed', display: 'flex', alignItems: 'center', justifyContent: 'center'
+                                }}>
+                                    <CreditCard style={{ width: 18, height: 18, color: '#f97316' }} />
+                                </div>
+                                <div style={{ fontWeight: 700, fontSize: 15, color: '#111' }}>Phương thức thanh toán</div>
                             </div>
-                            <div className="rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800">
-                                Thanh toán khi nhận hàng (COD) - bắt buộc.
+
+                            <div style={{
+                                border: '2px solid #f97316', borderRadius: 10,
+                                padding: '14px 18px', background: '#fff7ed',
+                                display: 'flex', alignItems: 'center', gap: 12
+                            }}>
+                                <div style={{
+                                    width: 20, height: 20, borderRadius: '50%',
+                                    border: '2px solid #f97316', background: '#f97316',
+                                    display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0
+                                }}>
+                                    <div style={{ width: 8, height: 8, borderRadius: '50%', background: '#fff' }} />
+                                </div>
+                                <div>
+                                    <div style={{ fontWeight: 700, fontSize: 14, color: '#92400e' }}>Thanh toán khi nhận hàng (COD)</div>
+                                    <div style={{ fontSize: 12, color: '#b45309', marginTop: 2 }}>Trả tiền mặt khi nhận hàng, hoàn toàn an toàn</div>
+                                </div>
+                                <Truck style={{ width: 22, height: 22, color: '#f97316', marginLeft: 'auto' }} />
                             </div>
-                            <div className="text-xs text-slate-500 mt-2">(Bạn có thể tìm hiểu thêm các ví điện tử ở các phiên bản sau.)</div>
                         </div>
 
-                        <div className="flex items-center justify-between pt-4">
-                            <Link to="/cart" className="btn-ghost">Quay lại giỏ hàng</Link>
-                            <button type="submit" className="btn-primary" disabled={loading}>
-                                Xác nhận đặt hàng
+                        {/* Security note */}
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '10px 14px', background: '#f0fdf4', border: '1px solid #bbf7d0', borderRadius: 8, marginBottom: 20 }}>
+                            <ShieldCheck style={{ width: 16, height: 16, color: '#16a34a', flexShrink: 0 }} />
+                            <span style={{ fontSize: 12, color: '#15803d' }}>Thông tin đơn hàng được bảo mật tuyệt đối. Chính sách đổi trả trong vòng 7 ngày.</span>
+                        </div>
+
+                        {/* Actions */}
+                        <div style={{ display: 'flex', gap: 12, alignItems: 'center' }}>
+                            <Link to="/cart" style={{
+                                display: 'flex', alignItems: 'center', gap: 6,
+                                padding: '12px 20px', border: '1.5px solid #e5e7eb', borderRadius: 10,
+                                fontSize: 14, fontWeight: 600, color: '#374151',
+                                background: '#fff', textDecoration: 'none'
+                            }}
+                                onMouseEnter={e => { e.currentTarget.style.borderColor = '#f97316'; e.currentTarget.style.color = '#f97316'; }}
+                                onMouseLeave={e => { e.currentTarget.style.borderColor = '#e5e7eb'; e.currentTarget.style.color = '#374151'; }}>
+                                ← Quay lại giỏ
+                            </Link>
+                            <button type="submit" disabled={loading} style={{
+                                flex: 1, padding: '13px 24px',
+                                background: loading ? '#9ca3af' : 'linear-gradient(135deg, #f97316, #ea580c)',
+                                color: '#fff', border: 'none', borderRadius: 10,
+                                fontWeight: 700, fontSize: 15, cursor: loading ? 'not-allowed' : 'pointer',
+                                display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
+                                boxShadow: loading ? 'none' : '0 4px 15px rgba(249,115,22,0.4)'
+                            }}>
+                                <PackageCheck style={{ width: 18, height: 18 }} />
+                                {loading ? 'Đang xử lý...' : 'Xác nhận đặt hàng'}
                             </button>
                         </div>
                     </form>
 
-                    <div className="surface rounded-3xl p-6 h-fit">
-                        <h3 className="font-semibold text-slate-900 mb-4">Tóm tắt đơn hàng</h3>
-                        <div className="space-y-2 text-sm text-slate-600">
-                            {cart.items.map((item) => (
-                                <div key={item.productId} className="flex justify-between">
-                                    <span>{item.title} x {item.quantity}</span>
-                                    <span className="font-semibold text-slate-900">{formatCurrency(item.lineTotal)}</span>
+                    {/* ── RIGHT: Order summary ── */}
+                    <div style={{ position: 'sticky', top: 16 }}>
+                        <div style={{ background: '#fff', borderRadius: 14, border: '1px solid #e5e7eb', overflow: 'hidden' }}>
+                            <div style={{ background: 'linear-gradient(135deg, #f97316, #ea580c)', padding: '16px 20px' }}>
+                                <div style={{ fontWeight: 700, fontSize: 15, color: '#fff' }}>Tóm tắt đơn hàng</div>
+                                <div style={{ fontSize: 12, color: 'rgba(255,255,255,0.8)', marginTop: 2 }}>{cart.items.length} sản phẩm</div>
+                            </div>
+
+                            <div style={{ padding: '16px 20px' }}>
+                                {/* Items */}
+                                <div style={{ display: 'flex', flexDirection: 'column', gap: 12, marginBottom: 16 }}>
+                                    {cart.items.map((item) => (
+                                        <div key={item.productId} style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                                            <div style={{
+                                                width: 44, height: 56, borderRadius: 6,
+                                                background: '#f3f4f6', flexShrink: 0, overflow: 'hidden',
+                                                border: '1px solid #e5e7eb'
+                                            }}>
+                                                {item.image && <img src={item.image} alt={item.title} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />}
+                                            </div>
+                                            <div style={{ flex: 1, minWidth: 0 }}>
+                                                <div style={{ fontSize: 13, fontWeight: 600, color: '#111', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                                                    {item.title}
+                                                </div>
+                                                <div style={{ fontSize: 12, color: '#9ca3af', marginTop: 2 }}>x{item.quantity}</div>
+                                            </div>
+                                            <div style={{ fontSize: 13, fontWeight: 700, color: '#f97316', flexShrink: 0 }}>
+                                                {formatCurrency(item.lineTotal)}
+                                            </div>
+                                        </div>
+                                    ))}
                                 </div>
-                            ))}
-                        </div>
-                        <div className="border-t border-slate-200 mt-4 pt-4 space-y-2 text-sm text-slate-600">
-                            <div className="flex justify-between">
-                                <span>Tạm tính</span>
-                                <span className="font-semibold text-slate-900">{formatCurrency(cart.summary.subtotal)}</span>
-                            </div>
-                            <div className="flex justify-between">
-                                <span>Phí vận chuyển</span>
-                                <span className="font-semibold text-slate-900">{formatCurrency(cart.summary.shippingFee)}</span>
-                            </div>
-                            <div className="flex justify-between text-base">
-                                <span className="font-semibold">Tổng cộng</span>
-                                <span className="font-bold text-slate-900">{formatCurrency(cart.summary.total)}</span>
+
+                                {/* Divider */}
+                                <div style={{ borderTop: '1px dashed #e5e7eb', margin: '0 0 14px' }} />
+
+                                {/* Subtotals */}
+                                <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+                                    <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 13, color: '#6b7280' }}>
+                                        <span>Tạm tính</span>
+                                        <span style={{ fontWeight: 600, color: '#374151' }}>{formatCurrency(cart.summary.subtotal)}</span>
+                                    </div>
+                                    <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 13, color: '#6b7280' }}>
+                                        <span>Phí vận chuyển</span>
+                                        <span style={{ fontWeight: 600, color: cart.summary.shippingFee === 0 ? '#16a34a' : '#374151' }}>
+                                            {cart.summary.shippingFee === 0 ? 'Miễn phí' : formatCurrency(cart.summary.shippingFee)}
+                                        </span>
+                                    </div>
+                                </div>
+
+                                {/* Total */}
+                                <div style={{ background: '#fff7ed', border: '1px solid #fed7aa', borderRadius: 10, padding: '12px 16px', marginTop: 14 }}>
+                                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                                        <span style={{ fontWeight: 700, fontSize: 15, color: '#111' }}>Tổng cộng</span>
+                                        <span style={{ fontWeight: 900, fontSize: 20, color: '#f97316' }}>{formatCurrency(cart.summary.total)}</span>
+                                    </div>
+                                </div>
+
+                                {/* Trust badges */}
+                                <div style={{ marginTop: 16, display: 'flex', flexDirection: 'column', gap: 8 }}>
+                                    {[
+                                        { icon: ShieldCheck, label: 'Bảo hành chính hãng', color: '#16a34a' },
+                                        { icon: Truck, label: 'Giao hàng toàn quốc', color: '#2563eb' },
+                                        { icon: PackageCheck, label: 'Đổi trả 7 ngày', color: '#f97316' },
+                                    ].map(({ icon: Icon, label, color }) => (
+                                        <div key={label} style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 12, color: '#6b7280' }}>
+                                            <Icon style={{ width: 14, height: 14, color, flexShrink: 0 }} />
+                                            {label}
+                                        </div>
+                                    ))}
+                                </div>
                             </div>
                         </div>
                     </div>
+
                 </div>
             </div>
         </div>
@@ -178,4 +331,3 @@ const CheckoutPage = () => {
 };
 
 export default CheckoutPage;
-

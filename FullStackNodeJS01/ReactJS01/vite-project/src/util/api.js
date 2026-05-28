@@ -21,6 +21,9 @@ const getUserApi = () =>
 const getUserProfileApi = () =>
     axios.get("/v1/api/user/profile");
 
+const updateProfileApi = (data) =>
+    axios.patch("/v1/api/user/profile", data);
+
 const getAdminProfileApi = () =>
     axios.get("/v1/api/admin/profile");
 
@@ -173,6 +176,7 @@ export {
     verifyForgotPasswordOTPApi,
     getUserApi,
     getUserProfileApi,
+    updateProfileApi,
     getAdminProfileApi,
     getProductsApi,
     getProductDetailApi,

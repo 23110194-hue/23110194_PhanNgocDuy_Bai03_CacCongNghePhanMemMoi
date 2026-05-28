@@ -10,6 +10,7 @@ const {
     getAdminProfile,
     handleSendForgotPasswordOTP,
     handleVerifyForgotPasswordOTP,
+    updateProfile,
 } = require('../controllers/userController');
 
 const { apiGetProducts, apiGetProductDetail } = require('../controllers/homeController');
@@ -98,8 +99,9 @@ routerAPI.post('/forgot-password', otpLimiter, validateForgotPassword, handleSen
 routerAPI.post('/verify-forgot-password', otpLimiter, validateResetPassword, handleVerifyForgotPasswordOTP);
 
 routerAPI.get('/account', delay, getAccount);
-routerAPI.get('/user', getUser);
+routerAPI.get('/user', authorizeRole('admin'), getUser);
 routerAPI.get('/user/profile', authorizeRole('user', 'admin'), getUserProfile);
+routerAPI.patch('/user/profile', updateProfile);
 routerAPI.get('/admin/profile', authorizeRole('admin'), getAdminProfile);
 
 routerAPI.get('/products', apiGetProducts);

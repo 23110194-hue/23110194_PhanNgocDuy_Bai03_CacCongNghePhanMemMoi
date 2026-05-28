@@ -85,9 +85,9 @@ const loginService = async (email, password) => {
             admin: '/admin/profile',
             vendor: '/vendor/shop',
             manager: '/manager/vendors',
-            user: '/user/profile',
+            user: '/',
         };
-        const redirectUrl = redirectByRole[user.role] || '/user/profile';
+        const redirectUrl = redirectByRole[user.role] || '/';
 
         return {
             EC: 0,

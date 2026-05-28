@@ -3,10 +3,22 @@ import { Link, useNavigate } from 'react-router-dom';
 import { notification } from 'antd';
 import { AuthContext } from '../components/context/auth.context';
 import { getVendorReviewsApi, updateVendorReviewVisibilityApi } from '../util/api';
+import DashboardLayout from '../components/layout/DashboardLayout';
+import { Store, Package, ShoppingBag, Star, DollarSign, Heart } from 'lucide-react';
+
+const MENU = [
+    { key: 'shop',     label: 'Shop của tôi',   sub: 'Cập nhật thông tin shop',  icon: Store       },
+    { key: 'products', label: 'Sản phẩm',        sub: 'Quản lý sách bán',          icon: Package     },
+    { key: 'orders',   label: 'Đơn hàng',        sub: 'Xem & xử lý đơn',           icon: ShoppingBag },
+    { key: 'reviews',  label: 'Đánh giá',        sub: 'Phản hồi khách hàng',       icon: Star        },
+    { key: 'revenue',  label: 'Doanh thu',       sub: 'Thống kê doanh thu shop',   icon: DollarSign  },
+    { key: 'favorites',label: 'Yêu thích',       sub: 'Sản phẩm được lưu',         icon: Heart       },
+];
+
 
 const VendorReviews = () => {
     const navigate = useNavigate();
-    const { auth, appLoading } = useContext(AuthContext);
+    const { auth, setAuth, appLoading } = useContext(AuthContext);
     const [loading, setLoading] = useState(true);
     const [reviews, setReviews] = useState([]);
     const [products, setProducts] = useState([]);
@@ -58,12 +70,37 @@ const VendorReviews = () => {
         notification.error({ message: 'Không thể cập nhật', description: res?.message });
     };
 
+    const handleLogout = () => {
+        localStorage.removeItem('access_token');
+        setAuth({ isAuthenticated: false, user: { id: '', email: '', name: '', role: '' } });
+        window.location.href = '/';
+    };
+
+    const handleMenuClick = (key) => {
+        if (key === 'shop') { navigate('/vendor/shop'); }
+        else if (key === 'products') { navigate('/vendor/products'); }
+        else if (key === 'orders') { navigate('/vendor/orders'); }
+        else if (key === 'reviews') { navigate('/vendor/reviews'); }
+        else if (key === 'revenue') { navigate('/vendor/revenue'); }
+        else if (key === 'favorites') { navigate('/vendor/favorites'); }
+    };
+
     if (appLoading) return null;
     if (!auth.isAuthenticated || auth.user?.role !== 'vendor') return null;
 
+    const activeItem = MENU.find(m => m.key === 'reviews');
+
     return (
-        <div style={{ background: '#f5f6fa', minHeight: '100vh', padding: '24px 0 40px' }}>
-            <div className="container">
+        <DashboardLayout
+            menuItems={MENU}
+            activeKey="reviews"
+            setActiveKey={handleMenuClick}
+            user={auth.user}
+            onLogout={handleLogout}
+            topbarTitle={activeItem?.label}
+            topbarSub={activeItem?.sub}
+        >
+            <div>
                 <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 20 }}>
                     <div>
                         <h1 style={{ fontSize: 20, fontWeight: 800, color: '#111', margin: 0 }}>Bình luận &amp; đánh giá</h1>
@@ -114,7 +151,7 @@ const VendorReviews = () => {
                     </div>
                 )}
             </div>
-        </div>
+        </DashboardLayout>
     );
 };
 

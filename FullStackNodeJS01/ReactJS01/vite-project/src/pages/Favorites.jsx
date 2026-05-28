@@ -5,10 +5,19 @@ import { Heart, ShoppingCart } from 'lucide-react';
 import { AuthContext } from '../components/context/auth.context';
 import { getFavoritesApi, removeFavoriteApi } from '../util/api';
 import { formatCurrency } from '../util/format';
+import DashboardLayout from '../components/layout/DashboardLayout';
+import { ShoppingBag, User } from 'lucide-react';
+
+const MENU = [
+    { key: 'profile',   label: 'Hồ sơ của tôi',  sub: 'Thông tin tài khoản',    icon: User        },
+    { key: 'orders',    label: 'Đơn hàng',         sub: 'Xem lịch sử mua hàng',  icon: ShoppingBag },
+    { key: 'favorites', label: 'Yêu thích',         sub: 'Sách đã lưu',            icon: Heart       },
+];
+
 
 const FavoritesPage = () => {
     const navigate = useNavigate();
-    const { auth, appLoading } = useContext(AuthContext);
+    const { auth, setAuth, appLoading } = useContext(AuthContext);
     const [items, setItems] = useState([]);
     const [loading, setLoading] = useState(true);
 
@@ -23,9 +32,10 @@ const FavoritesPage = () => {
     useEffect(() => {
         if (!appLoading) {
             if (!auth.isAuthenticated) { navigate('/login'); return; }
+            if (auth.user?.role !== 'user') { navigate('/'); return; }
             fetchFavorites();
         }
-    }, [auth.isAuthenticated, appLoading, navigate]);
+    }, [auth.isAuthenticated, auth.user, appLoading, navigate]);
 
     const handleRemove = async (productId) => {
         const res = await removeFavoriteApi(productId);
@@ -37,12 +47,36 @@ const FavoritesPage = () => {
         notification.error({ message: 'Không thể bỏ yêu thích', description: res?.message });
     };
 
+    const handleLogout = () => {
+        localStorage.removeItem('access_token');
+        setAuth({ isAuthenticated: false, user: { id: '', email: '', name: '', role: '' } });
+        window.location.href = '/';
+    };
+
+    const handleMenuClick = (key) => {
+        if (key === 'profile')   { navigate('/user/profile'); }
+        else if (key === 'orders')    { navigate('/orders'); }
+        else if (key === 'favorites') { navigate('/favorites'); }
+    };
+
     if (appLoading || !auth.isAuthenticated) return null;
 
+    const activeItem = MENU.find(m => m.key === 'favorites');
+
     return (
-        <div style={{ background: '#f5f6fa', minHeight: '100vh', padding: '24px 0 40px' }}>
-            <div className="container">
-                {/* Header */}
+        <DashboardLayout
+            menuItems={MENU}
+            activeKey="favorites"
+            setActiveKey={handleMenuClick}
+            user={auth.user}
+            onLogout={handleLogout}
+            topbarTitle={activeItem?.label}
+            topbarSub={activeItem?.sub}
+        >
+            <div>
+                {/* Header ẩn đi vì đã có Topbar */}
+                {/* <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 20 }}> ... </div> */}
+
                 <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 20 }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
                         <div style={{ width: 40, height: 40, borderRadius: 10, background: '#fff7ed', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
@@ -102,7 +136,7 @@ const FavoritesPage = () => {
                     </div>
                 )}
             </div>
-        </div>
+        </DashboardLayout>
     );
 };
 

@@ -9,13 +9,11 @@ import {
 } from "react-router-dom";
 
 import RegisterPage from './pages/register.jsx';
-import UserPage from './pages/user.jsx';
 import HomePage from './pages/home.jsx';
 import LoginPage from './pages/login.jsx';
 import ForgotPasswordPage from './pages/forgotPassword.jsx';
 import UserProfile from './pages/UserProfile.jsx';
 import AdminProfile from './pages/AdminProfile.jsx';
-import AdminOrders from './pages/AdminOrders.jsx';
 import Products from './pages/Products.jsx';
 import ProductDetail from './pages/ProductDetail.jsx';
 import CartPage from './pages/Cart.jsx';
@@ -31,10 +29,6 @@ import VendorReviews from './pages/VendorReviews.jsx';
 import VendorFavorites from './pages/VendorFavorites.jsx';
 import ManagerVendors from './pages/ManagerVendors.jsx';
 import ManagerProducts from './pages/ManagerProducts.jsx';
-import AdminUsers from './pages/AdminUsers.jsx';
-import AdminProducts from './pages/AdminProducts.jsx';
-import AdminShops from './pages/AdminShops.jsx';
-import AdminRevenue from './pages/AdminRevenue.jsx';
 import { AuthWrapper } from './components/context/auth.context.jsx';
 import { CartWrapper } from './components/context/cart.context.jsx';
 
@@ -51,14 +45,8 @@ const router = createBrowserRouter([
       { path: "orders", element: <OrdersPage /> },
       { path: "orders/:id", element: <OrderDetailPage /> },
       { path: "favorites", element: <FavoritesPage /> },
-      { path: "user", element: <UserPage /> },
       { path: "user/profile", element: <UserProfile /> },
       { path: "admin/profile", element: <AdminProfile /> },
-      { path: "admin/orders", element: <AdminOrders /> },
-      { path: "admin/users", element: <AdminUsers /> },
-      { path: "admin/products", element: <AdminProducts /> },
-      { path: "admin/shops", element: <AdminShops /> },
-      { path: "admin/revenue", element: <AdminRevenue /> },
       { path: "vendor/shop", element: <VendorShop /> },
       { path: "vendor/products", element: <VendorProducts /> },
       { path: "vendor/orders", element: <VendorOrders /> },

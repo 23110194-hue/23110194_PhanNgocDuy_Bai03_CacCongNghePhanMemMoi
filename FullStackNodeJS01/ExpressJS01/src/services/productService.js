@@ -51,7 +51,20 @@ const getDecoratedProductById = async (productId) => {
 
 const getDecoratedProductBySlug = async (slug) => {
     const product = await getProductBySlug(slug);
-    return product ? decorateProduct(product) : null;
+    if (!product) return null;
+    
+    const decorated = decorateProduct(product);
+    
+    if (decorated.shopId) {
+        const Shop = require('../models/shop');
+        const shopInfo = await Shop.findById(decorated.shopId).lean();
+        if (shopInfo) {
+            decorated.shopName = shopInfo.name;
+            decorated.shopSlug = shopInfo.slug;
+        }
+    }
+    
+    return decorated;
 };
 
 const parseFilters = (query) => {
@@ -147,6 +160,16 @@ const getProductDetailData = async (slug) => {
         return { product: null, similarProducts: [] };
     }
 
+    // Lookup Shop information if shopId exists
+    if (product.shopId) {
+        const Shop = require('../models/shop');
+        const shopInfo = await Shop.findById(product.shopId).lean();
+        if (shopInfo) {
+            product.shopName = shopInfo.name;
+            product.shopSlug = shopInfo.slug;
+        }
+    }
+
     const similarProducts = decorated
         .filter((item) => item.category === product.category && item.slug !== product.slug)
         .slice()
@@ -169,8 +192,8 @@ const getFilteredProductsData = async (query) => {
 };
 
 const getNextProductId = async () => {
-    const last = await Product.findOne({}).sort({ id: -1 }).lean();
-    return last ? last.id + 1 : 1;
+    // Tránh lỗi concurrency khi có nhiều request tạo product cùng lúc
+    return Date.now() * 1000 + Math.floor(Math.random() * 1000);
 };
 
 module.exports = {

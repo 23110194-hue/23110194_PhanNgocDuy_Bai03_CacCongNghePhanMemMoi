@@ -124,28 +124,72 @@ const createOrderService = async (userEmail, shippingAddress) => {
     const summary = buildSummary(orderItems);
     const user = await User.findOne({ email: userEmail }).select('name email');
 
-    const order = await Order.create({
-        orderNumber: generateOrderNumber(),
-        userEmail,
-        userName: user?.name || '',
-        items: orderItems,
-        summary,
-        paymentMethod: 'COD',
-        shippingAddress,
-        status: ORDER_STATUS.NEW,
-        timeline: [
-            {
-                status: ORDER_STATUS.NEW,
-                at: new Date(),
-                note: 'Đặt hàng COD',
-            },
-        ],
-    });
+    // Trừ tồn kho nguyên tử (Atomic Deduction) - Đảm bảo không bị bán âm
+    const deductionResults = await Promise.all(
+        orderItems.map(async (item) => {
+            const result = await Product.updateOne(
+                { id: item.productId, stock: { $gte: item.quantity } },
+                { $inc: { stock: -item.quantity } }
+            );
+            return { item, success: result.modifiedCount > 0 };
+        })
+    );
+
+    const failedDeductions = deductionResults.filter((r) => !r.success);
+
+    // Nếu có sản phẩm không đủ tồn kho lúc trừ thực tế -> Rollback và hủy tạo đơn
+    if (failedDeductions.length > 0) {
+        const successfulDeductions = deductionResults.filter((r) => r.success);
+        await Promise.all(
+            successfulDeductions.map((r) =>
+                Product.updateOne(
+                    { id: r.item.productId },
+                    { $inc: { stock: r.item.quantity } }
+                ).catch(() => {})
+            )
+        );
+        return { error: 'Một số sản phẩm đã hết hàng hoặc không đủ số lượng trong lúc thanh toán, vui lòng thử lại.' };
+    }
+
+    // Group items by shopId
+    const shopGroups = {};
+    for (const item of orderItems) {
+        const sid = item.shopId || 'unassigned';
+        if (!shopGroups[sid]) shopGroups[sid] = [];
+        shopGroups[sid].push(item);
+    }
+
+    const createdOrders = [];
+    
+    for (const sid in shopGroups) {
+        const items = shopGroups[sid];
+        const summary = buildSummary(items);
+        const order = await Order.create({
+            orderNumber: generateOrderNumber(),
+            userEmail,
+            userName: user?.name || '',
+            items: items,
+            summary,
+            paymentMethod: 'COD',
+            shippingAddress,
+            status: ORDER_STATUS.NEW,
+            timeline: [
+                {
+                    status: ORDER_STATUS.NEW,
+                    at: new Date(),
+                    note: 'Đặt hàng COD',
+                },
+            ],
+        });
+        createdOrders.push(serializeOrder(order));
+    }
 
     cart.items = [];
     await cart.save();
 
-    return serializeOrder(order);
+    // Return the first created order to maintain API signature, 
+    // although the frontend now redirects to /orders
+    return createdOrders.length > 0 ? createdOrders[0] : null;
 };
 
 const listOrdersService = async (userEmail) => {
@@ -231,6 +275,17 @@ const cancelOrderService = async (orderId, userEmail) => {
             note: 'Đơn hàng đã được hủy bởi khách hàng.',
         });
         await order.save();
+
+        // Hoàn lại tồn kho
+        await Promise.all(
+            order.items.map((item) =>
+                Product.updateOne(
+                    { id: item.productId },
+                    { $inc: { stock: item.quantity } }
+                ).catch(() => {})
+            )
+        );
+
         return serializeOrder(order);
     }
 
@@ -283,10 +338,20 @@ const updateOrderStatusService = async (orderId, status, note) => {
     if (status === ORDER_STATUS.CANCELED) {
         order.canceledAt = new Date();
         order.cancelRequested = false;
+
+        // Hoàn lại tồn kho
+        await Promise.all(
+            order.items.map((item) =>
+                Product.updateOne(
+                    { id: item.productId },
+                    { $inc: { stock: item.quantity } }
+                ).catch(() => {})
+            )
+        );
     }
     if (status === ORDER_STATUS.DELIVERED) {
         order.deliveredAt = new Date();
-        // Tăng số lượng đã bán và giảm tồn kho cho từng sản phẩm trong đơn
+        // Tăng số lượng đã bán (stock đã được trừ lúc tạo đơn)
         await Promise.all(
             order.items.map((item) =>
                 Product.updateOne(
@@ -294,7 +359,6 @@ const updateOrderStatusService = async (orderId, status, note) => {
                     {
                         $inc: {
                             sold: item.quantity,
-                            stock: -item.quantity,
                         },
                     }
                 ).catch(() => {})

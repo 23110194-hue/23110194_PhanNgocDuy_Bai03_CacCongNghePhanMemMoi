@@ -1,13 +1,21 @@
-﻿import React, { useContext, useEffect, useState } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { notification } from 'antd';
 import { AuthContext } from '../components/context/auth.context';
-import { getManagerProductsApi, updateManagerProductStatusApi } from '../util/api';
 import { formatCurrency } from '../util/format';
+import DashboardLayout from '../components/layout/DashboardLayout';
+import { Store, Package } from 'lucide-react';
+import { getManagerProductsApi, updateManagerProductStatusApi } from '../util/api';
+
+const MENU = [
+    { key: 'vendors',  label: 'Quản lý Vendor', sub: 'Duyệt và kiểm soát shop',   icon: Store   },
+    { key: 'products', label: 'Kiểm duyệt SP',  sub: 'Duyệt sản phẩm Vendor',     icon: Package },
+];
+
 
 const ManagerProducts = () => {
     const navigate = useNavigate();
-    const { auth, appLoading } = useContext(AuthContext);
+    const { auth, setAuth, appLoading } = useContext(AuthContext);
     const [products, setProducts] = useState([]);
     const [loading, setLoading] = useState(true);
 
@@ -46,12 +54,33 @@ const ManagerProducts = () => {
         notification.error({ message: 'Không thể cập nhật', description: res?.message });
     };
 
+    const handleLogout = () => {
+        localStorage.removeItem('access_token');
+        setAuth({ isAuthenticated: false, user: { id: '', email: '', name: '', role: '' } });
+        window.location.href = '/';
+    };
+
+    const handleMenuClick = (key) => {
+        if (key === 'vendors') { navigate('/manager/vendors'); }
+        else if (key === 'products') { navigate('/manager/products'); }
+    };
+
     if (appLoading) return null;
     if (!auth.isAuthenticated || auth.user?.role !== 'manager') return null;
 
+    const activeItem = MENU.find(m => m.key === 'products');
+
     return (
-        <div style={{ background: '#f5f6fa', minHeight: '100vh', padding: '24px 0 40px' }}>
-            <div className="container">
+        <DashboardLayout
+            menuItems={MENU}
+            activeKey="products"
+            setActiveKey={handleMenuClick}
+            user={auth.user}
+            onLogout={handleLogout}
+            topbarTitle={activeItem?.label}
+            topbarSub={activeItem?.sub}
+        >
+            <div>
                 <div className="flex items-center justify-between gap-4 mb-8">
                     <div>
                         <h1 className="font-display text-3xl font-semibold text-slate-900">Kiểm duyệt sản phẩm</h1>
@@ -101,7 +130,7 @@ const ManagerProducts = () => {
                     </div>
                 )}
             </div>
-        </div>
+        </DashboardLayout>
     );
 };
 

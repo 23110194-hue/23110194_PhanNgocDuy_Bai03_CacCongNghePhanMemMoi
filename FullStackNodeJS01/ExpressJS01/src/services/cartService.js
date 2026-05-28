@@ -73,7 +73,7 @@ const addToCartService = async (userEmail, productId, quantity) => {
         return { error: 'Sản phẩm không tồn tại.' };
     }
 
-    const normalizedQty = Number(quantity);
+    const normalizedQty = parseInt(Number(quantity), 10);
     if (!Number.isFinite(normalizedQty) || normalizedQty <= 0) {
         return { error: 'Số lượng không hợp lệ.' };
     }
@@ -102,7 +102,7 @@ const updateCartItemService = async (userEmail, productId, quantity) => {
         return { error: 'Sản phẩm không tồn tại.' };
     }
 
-    const normalizedQty = Number(quantity);
+    const normalizedQty = parseInt(Number(quantity), 10);
     if (!Number.isFinite(normalizedQty)) {
         return { error: 'Số lượng không hợp lệ.' };
     }

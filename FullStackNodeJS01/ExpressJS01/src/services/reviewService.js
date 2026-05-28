@@ -84,9 +84,6 @@ const listShopReviews = async (shopId) => {
     return ShopReview.find({ shopId, isVisible: true }).sort({ createdAt: -1 });
 };
 
-const listReviewsForShopProducts = async (productIds) => {
-    return ProductReview.find({ productId: { $in: productIds } }).sort({ createdAt: -1 });
-};
 
 const updateReviewVisibility = async (reviewId, isVisible) => {
     const review = await ProductReview.findByIdAndUpdate(
@@ -107,6 +104,5 @@ module.exports = {
     listProductReviews,
     listOrderReview,
     listShopReviews,
-    listReviewsForShopProducts,
     updateReviewVisibility,
 };

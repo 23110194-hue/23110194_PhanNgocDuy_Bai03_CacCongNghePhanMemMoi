@@ -110,8 +110,7 @@ const ForgotPasswordPage = () => {
                             <Form.Item name="email" rules={[{ required: true, message: 'Vui lòng nhập email!' }, { type: 'email', message: 'Email không hợp lệ!' }]} style={{ marginBottom: 16 }}>
                                 <input placeholder="Email đã đăng ký" style={inputStyle} onChange={e => emailForm.setFieldValue('email', e.target.value)} />
                             </Form.Item>
-                            <button type="submit" style={{ ...btnPrimary, opacity: loading ? 0.7 : 1 }} disabled={loading}
-                                onClick={() => emailForm.submit()}>
+                            <button type="submit" style={{ ...btnPrimary, opacity: loading ? 0.7 : 1 }} disabled={loading}>
                                 {loading ? 'Đang gửi...' : 'Gửi mã OTP'}
                             </button>
                         </Form>
@@ -153,7 +152,7 @@ const ForgotPasswordPage = () => {
                                             onChange={e => resetForm.setFieldValue('confirmNewPassword', e.target.value)} />
                                     </Form.Item>
                                 </div>
-                                <button type="button" style={{ ...btnPrimary, opacity: loading ? 0.7 : 1 }} disabled={loading} onClick={() => resetForm.submit()}>
+                                <button type="submit" style={{ ...btnPrimary, opacity: loading ? 0.7 : 1 }} disabled={loading}>
                                     {loading ? 'Đang xử lý...' : 'Đặt lại mật khẩu'}
                                 </button>
                                 <button type="button" style={btnGhost} disabled={resendLoading} onClick={handleResendOTP}>

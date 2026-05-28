@@ -38,8 +38,16 @@ const createVendorProduct = async (ownerId, payload) => {
     const shop = await getShopByOwner(ownerId);
     if (!shop) return { error: 'Shop chưa đăng ký.' };
 
-    if (!payload?.title || !payload?.category || !payload?.price) {
+    if (!payload?.title || !payload?.category || payload?.price === undefined) {
         return { error: 'Vui lòng nhập đầy đủ thông tin sản phẩm.' };
+    }
+
+    const price = Number(payload.price);
+    const stock = Number(payload.stock || 0);
+    const discountPercent = Number(payload.discountPercent || 0);
+
+    if (price < 0 || stock < 0 || discountPercent < 0 || discountPercent > 100) {
+        return { error: 'Giá, số lượng hoặc phần trăm giảm giá không hợp lệ.' };
     }
 
     const nextId = await getNextProductId();
@@ -51,11 +59,11 @@ const createVendorProduct = async (ownerId, payload) => {
         title: payload.title,
         author: payload.author || '',
         category: payload.category,
-        price: Number(payload.price),
-        discountPercent: Number(payload.discountPercent || 0),
+        price,
+        discountPercent,
         isNew: Boolean(payload.isNew),
         isHot: Boolean(payload.isHot),
-        stock: Number(payload.stock || 0),
+        stock,
         sold: 0,
         views: 0,
         publishedAt: payload.publishedAt ? new Date(payload.publishedAt) : new Date(),
@@ -83,9 +91,21 @@ const updateVendorProduct = async (ownerId, productId, payload) => {
 
     product.author = payload?.author ?? product.author;
     product.category = payload?.category ?? product.category;
-    if (payload?.price !== undefined) product.price = Number(payload.price);
-    if (payload?.discountPercent !== undefined) product.discountPercent = Number(payload.discountPercent);
-    if (payload?.stock !== undefined) product.stock = Number(payload.stock);
+    if (payload?.price !== undefined) {
+        const p = Number(payload.price);
+        if (p < 0) return { error: 'Giá không hợp lệ.' };
+        product.price = p;
+    }
+    if (payload?.discountPercent !== undefined) {
+        const d = Number(payload.discountPercent);
+        if (d < 0 || d > 100) return { error: 'Phần trăm giảm giá không hợp lệ.' };
+        product.discountPercent = d;
+    }
+    if (payload?.stock !== undefined) {
+        const s = Number(payload.stock);
+        if (s < 0) return { error: 'Số lượng tồn kho không hợp lệ.' };
+        product.stock = s;
+    }
     product.isNew = payload?.isNew ?? product.isNew;
     product.isHot = payload?.isHot ?? product.isHot;
     product.description = payload?.description ?? product.description;

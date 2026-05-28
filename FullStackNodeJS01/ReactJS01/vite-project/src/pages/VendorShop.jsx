@@ -54,6 +54,7 @@ const VendorShop = () => {
             notification.success({ message: shop ? 'Đã cập nhật shop' : 'Đăng ký shop thành công!' });
             setShop(res);
             if (!shop) {
+                // Re-fetch account để cập nhật role mới (user -> vendor)
                 const accountRes = await axios.get('/v1/api/account');
                 if (accountRes && !accountRes.message) {
                     setAuth({ isAuthenticated: true, user: { id: accountRes.id ?? '', email: accountRes.email ?? '', name: accountRes.name ?? '', role: accountRes.role ?? 'user' } });

@@ -2,7 +2,7 @@ import React, { useContext, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { AuthContext } from '../context/auth.context';
 import { CartContext } from '../context/cart.context';
-import { Search, ShoppingCart, User, LogOut, Package, Crown, Truck, ChevronDown } from 'lucide-react';
+import { Search, ShoppingCart, User, LogOut, Package, Crown, Truck, ChevronDown, Home, Heart } from 'lucide-react';
 
 const Header = () => {
     const navigate = useNavigate();
@@ -69,20 +69,30 @@ const Header = () => {
 
                     {/* Right icons */}
                     <div style={{ display: 'flex', alignItems: 'center', gap: 20, marginLeft: 'auto' }}>
-                        {/* Cart */}
-                        <Link to="/cart" style={{ position: 'relative', color: '#4b5563', display: 'flex', alignItems: 'center', gap: 6 }}>
-                            <ShoppingCart style={{ width: 22, height: 22 }} />
-                            <span style={{ fontSize: 13, fontWeight: 500, display: 'none' }}>Giỏ hàng</span>
-                            {cartCount > 0 && (
-                                <span style={{
-                                    position: 'absolute', top: -8, right: -10,
-                                    background: '#f97316', color: '#fff',
-                                    fontSize: 11, fontWeight: 700,
-                                    width: 18, height: 18, borderRadius: '50%',
-                                    display: 'flex', alignItems: 'center', justifyContent: 'center'
-                                }}>{cartCount}</span>
-                            )}
-                        </Link>
+                        {/* Cart - Only show for Guest or User */}
+                        {(!auth.isAuthenticated || auth.user.role === 'user') && (
+                            <Link to="/cart" style={{
+                                position: 'relative', color: '#fff',
+                                display: 'flex', alignItems: 'center', gap: 7,
+                                background: '#f97316', padding: '7px 14px',
+                                borderRadius: 8, fontWeight: 600, fontSize: 13,
+                                textDecoration: 'none'
+                            }}
+                            onMouseEnter={e => e.currentTarget.style.background = '#ea6c04'}
+                            onMouseLeave={e => e.currentTarget.style.background = '#f97316'}>
+                                <ShoppingCart style={{ width: 18, height: 18 }} />
+                                <span>Giỏ hàng</span>
+                                {cartCount > 0 && (
+                                    <span style={{
+                                        background: '#fff', color: '#f97316',
+                                        fontSize: 11, fontWeight: 800,
+                                        width: 20, height: 20, borderRadius: '50%',
+                                        display: 'flex', alignItems: 'center', justifyContent: 'center',
+                                        marginLeft: 2
+                                    }}>{cartCount}</span>
+                                )}
+                            </Link>
+                        )}
 
                         {/* User */}
                         {auth.isAuthenticated ? (
@@ -114,10 +124,26 @@ const Header = () => {
                                         boxShadow: '0 4px 20px rgba(0,0,0,0.12)',
                                         zIndex: 100, paddingTop: 4, paddingBottom: 4
                                     }}>
-                                        {[
-                                            { to: profileUrl, label: 'Hồ sơ của tôi', icon: User },
+                                        {/* Profile - For all roles */}
+                                        <Link to="/user/profile" style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '9px 16px', fontSize: 13, color: '#374151' }}
+                                            onMouseEnter={e => e.currentTarget.style.background = '#f9fafb'}
+                                            onMouseLeave={e => e.currentTarget.style.background = 'transparent'}>
+                                            <User style={{ width: 14, height: 14 }} /> Hồ sơ cá nhân
+                                        </Link>
+
+                                        {/* View Storefront - Only for non-users (admin/vendor/manager) */}
+                                        {auth.user.role !== 'user' && (
+                                            <Link to="/" style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '9px 16px', fontSize: 13, color: '#374151' }}
+                                                onMouseEnter={e => e.currentTarget.style.background = '#f9fafb'}
+                                                onMouseLeave={e => e.currentTarget.style.background = 'transparent'}>
+                                                <Home style={{ width: 14, height: 14 }} /> Trang chủ mua sắm
+                                            </Link>
+                                        )}
+
+                                        {/* User Menu Items - Only for User role */}
+                                        {auth.user.role === 'user' && [
                                             { to: '/orders', label: 'Đơn hàng', icon: Package },
-                                            { to: '/favorites', label: 'Yêu thích', icon: Package },
+                                            { to: '/favorites', label: 'Yêu thích', icon: Heart },
                                         ].map(item => (
                                             <Link key={item.to} to={item.to} style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '9px 16px', fontSize: 13, color: '#374151' }}
                                                 onMouseEnter={e => e.currentTarget.style.background = '#f9fafb'}
@@ -126,6 +152,8 @@ const Header = () => {
                                                 {item.label}
                                             </Link>
                                         ))}
+
+                                        {/* Vendor Menu */}
                                         {auth.user.role === 'vendor' && (
                                             <Link to="/vendor/shop" style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '9px 16px', fontSize: 13, color: '#374151' }}
                                                 onMouseEnter={e => e.currentTarget.style.background = '#f9fafb'}

@@ -12,8 +12,9 @@ const CartPage = () => {
 
     useEffect(() => {
         if (!auth.isAuthenticated) { navigate('/login'); return; }
+        if (auth.user?.role !== 'user') { navigate('/'); return; }
         refreshCart(false);
-    }, [auth.isAuthenticated, navigate, refreshCart]);
+    }, [auth.isAuthenticated, auth.user, navigate, refreshCart]);
 
     if (!auth.isAuthenticated) return null;
 

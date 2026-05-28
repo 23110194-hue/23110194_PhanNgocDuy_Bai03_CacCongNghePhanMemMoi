@@ -175,8 +175,19 @@ const ProductDetail = () => {
                             </div>
 
                             <h1 style={{ fontSize: 22, fontWeight: 800, color: '#111', lineHeight: 1.35, marginBottom: 6 }}>{product.title}</h1>
-                            <div style={{ fontSize: 13, color: '#6b7280', marginBottom: 20 }}>
-                                Tác giả: <strong style={{ color: '#374151' }}>{product.author}</strong>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: 16, fontSize: 13, color: '#6b7280', marginBottom: 20, flexWrap: 'wrap' }}>
+                                <div>Tác giả: <strong style={{ color: '#374151' }}>{product.author}</strong></div>
+                                {product.shopName && (
+                                    <>
+                                        <div style={{ width: 4, height: 4, borderRadius: '50%', background: '#d1d5db' }} />
+                                        <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+                                            Cung cấp bởi: 
+                                            <span style={{ color: '#f97316', fontWeight: 600, display: 'flex', alignItems: 'center', gap: 4 }}>
+                                                <Package style={{ width: 14, height: 14 }} /> {product.shopName}
+                                            </span>
+                                        </div>
+                                    </>
+                                )}
                             </div>
 
                             {/* Price block */}

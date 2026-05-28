@@ -33,7 +33,7 @@ const auth = (req, res, next) => {
             id: decoded.id,
             email: decoded.email,
             name: decoded.name,
-            role: decoded.role,
+            role: decoded.role || 'user',
         };
         next();
     } catch {

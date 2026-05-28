@@ -24,7 +24,7 @@ const LoginPage = () => {
                     id: res?.user?.id ?? '',
                     email: res?.user?.email ?? '',
                     name: res?.user?.name ?? '',
-                    role: res?.user?.role ?? 'user',
+                    role: (res?.user?.role ?? 'user').toLowerCase(),
                 }
             });
             notification.success({ message: `Chào mừng trở lại, ${res?.user?.name || res?.user?.email}! 🎉` });

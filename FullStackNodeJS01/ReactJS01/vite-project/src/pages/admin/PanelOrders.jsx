@@ -1,7 +1,7 @@
 import React, { useEffect, useState, useMemo } from 'react';
 import { Link } from 'react-router-dom';
 import { notification } from 'antd';
-import { getAdminOrdersApi, updateOrderStatusApi } from '../../util/api';
+import { getAdminOrdersApi } from '../../util/api';
 import { formatCurrency, formatDate } from '../../util/format';
 import Pagination from '../../components/Pagination';
 
@@ -19,16 +19,10 @@ const STATUS_STYLE = {
     DELIVERED: { bg: '#f0fdf4', color: '#15803d', border: '#86efac' },
     CANCELED:  { bg: '#fef2f2', color: '#dc2626', border: '#fecaca' },
 };
-const NEXT_STATUS = {
-    NEW: ['CONFIRMED','CANCELED'], CONFIRMED: ['PREPARING','CANCELED'],
-    PREPARING: ['SHIPPING','CANCELED'], SHIPPING: ['DELIVERED'], DELIVERED: [], CANCELED: [],
-};
 
 const PanelOrders = () => {
     const [orders, setOrders]       = useState([]);
     const [loading, setLoading]     = useState(true);
-    const [statusDrafts, setSD]     = useState({});
-    const [noteDrafts, setND]       = useState({});
     const [page, setPage]           = useState(1);
 
     const fetchOrders = async () => {
@@ -43,20 +37,6 @@ const PanelOrders = () => {
     const totalPages = Math.ceil(orders.length / PAGE_SIZE);
     const paged = useMemo(() => orders.slice((page-1)*PAGE_SIZE, page*PAGE_SIZE), [orders, page]);
 
-    const handleUpdate = async (orderId) => {
-        const status = statusDrafts[orderId];
-        if (!status) { notification.warning({ message: 'Chọn trạng thái mới' }); return; }
-        const res = await updateOrderStatusApi(orderId, status, noteDrafts[orderId] || '');
-        if (res && !res.message) {
-            notification.success({ message: 'Cập nhật thành công' });
-            setOrders(prev => prev.map(o => o._id === res._id ? res : o));
-            setSD(p => { const n={...p}; delete n[orderId]; return n; });
-            setND(p => { const n={...p}; delete n[orderId]; return n; });
-            return;
-        }
-        notification.error({ message: 'Không thể cập nhật', description: res?.message });
-    };
-
     if (loading) return <div style={{ color: '#9ca3af', padding: 20 }}>Đang tải...</div>;
     if (orders.length === 0) return <div style={{ background: '#fff', borderRadius: 10, border: '1px solid #e5e7eb', padding: 48, textAlign: 'center', color: '#9ca3af' }}>Chưa có đơn hàng nào.</div>;
 
@@ -70,7 +50,6 @@ const PanelOrders = () => {
             <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
                 {paged.map(order => {
                     const ss = STATUS_STYLE[order.status] || STATUS_STYLE.NEW;
-                    const next = NEXT_STATUS[order.status] || [];
                     return (
                         <div key={order._id} style={{ background: '#fff', borderRadius: 10, border: '1px solid #e5e7eb', padding: '14px 16px' }}>
                             <div style={{ display: 'flex', flexWrap: 'wrap', gap: 16, alignItems: 'center', justifyContent: 'space-between' }}>
@@ -97,26 +76,6 @@ const PanelOrders = () => {
                                 </div>
                             </div>
 
-                            {next.length > 0 && (
-                                <div style={{ display: 'flex', flexWrap: 'wrap', gap: 10, marginTop: 12, paddingTop: 12, borderTop: '1px solid #f3f4f6', alignItems: 'flex-end' }}>
-                                    <div>
-                                        <div style={{ fontSize: 11, color: '#9ca3af', marginBottom: 4 }}>Chuyển trạng thái</div>
-                                        <select value={statusDrafts[order._id] || ''} onChange={e => setSD(p => ({...p, [order._id]: e.target.value}))}
-                                            style={{ border: '1px solid #e5e7eb', borderRadius: 6, padding: '6px 10px', fontSize: 13, outline: 'none' }}>
-                                            <option value="">Chọn...</option>
-                                            {next.map(s => <option key={s} value={s}>{STATUS_LABELS[s]}</option>)}
-                                        </select>
-                                    </div>
-                                    <div style={{ flex: 1, minWidth: 160 }}>
-                                        <div style={{ fontSize: 11, color: '#9ca3af', marginBottom: 4 }}>Ghi chú</div>
-                                        <input value={noteDrafts[order._id] || ''} onChange={e => setND(p => ({...p, [order._id]: e.target.value}))}
-                                            placeholder="Ghi chú..." style={{ width: '100%', border: '1px solid #e5e7eb', borderRadius: 6, padding: '6px 10px', fontSize: 13, outline: 'none' }} />
-                                    </div>
-                                    <button onClick={() => handleUpdate(order._id)} style={{
-                                        background: '#f97316', color: '#fff', border: 'none', borderRadius: 7, padding: '7px 18px', fontWeight: 700, fontSize: 13, cursor: 'pointer',
-                                    }}>Cập nhật</button>
-                                </div>
-                            )}
                         </div>
                     );
                 })}

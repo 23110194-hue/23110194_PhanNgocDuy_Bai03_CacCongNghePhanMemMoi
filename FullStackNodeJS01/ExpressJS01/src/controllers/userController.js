@@ -76,6 +76,24 @@ const handleVerifyForgotPasswordOTP = async (req, res) => {
     return res.status(200).json(data);
 };
 
+const updateProfile = async (req, res) => {
+    try {
+        const { name } = req.body;
+        if (!req.user || !req.user.id) return res.status(401).json({ message: 'Chưa xác thực' });
+        
+        const updateData = {};
+        if (name) updateData.name = name;
+        
+        const updatedUser = await User.findByIdAndUpdate(req.user.id, updateData, { new: true }).select('-password');
+        if (!updatedUser) return res.status(404).json({ message: 'Không tìm thấy người dùng' });
+        
+        return res.status(200).json(updatedUser);
+    } catch (error) {
+        console.error('Update profile error:', error);
+        return res.status(500).json({ message: 'Lỗi server' });
+    }
+};
+
 module.exports = {
     createUser,
     handleVerifyRegisterOTP,
@@ -86,4 +104,5 @@ module.exports = {
     getAdminProfile,
     handleSendForgotPasswordOTP,
     handleVerifyForgotPasswordOTP,
+    updateProfile,
 };
