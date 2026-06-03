@@ -1,6 +1,6 @@
 import React, { useContext, useEffect, useState } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
-import { addFavoriteApi, createProductReviewApi, getProductDetailApi, getProductReviewsApi, getProductsApi } from '../util/api';
+import { addFavoriteApi, removeFavoriteApi, getFavoritesApi, createProductReviewApi, getProductDetailApi, getProductReviewsApi, getProductsApi } from '../util/api';
 import { Swiper, SwiperSlide } from 'swiper/react';
 import { Navigation, Thumbs } from 'swiper/modules';
 import 'swiper/css';
@@ -28,6 +28,7 @@ const ProductDetail = () => {
     const [reviewForm, setReviewForm] = useState({ rating: 5, comment: '' });
     const [reviewLoading, setReviewLoading] = useState(false);
     const [favoriteLoading, setFavoriteLoading] = useState(false);
+    const [isFavorite, setIsFavorite] = useState(false);
     const { auth } = useContext(AuthContext);
     const { addToCart, cartLoading } = useContext(CartContext);
 
@@ -57,6 +58,25 @@ const ProductDetail = () => {
         window.scrollTo(0, 0);
     }, [slug]);
 
+    useEffect(() => {
+        const checkFavoriteStatus = async () => {
+            if (auth.isAuthenticated && product?.id) {
+                try {
+                    const res = await getFavoritesApi();
+                    if (res && res.items) {
+                        const found = res.items.some(item => item.id === product.id);
+                        setIsFavorite(found);
+                    }
+                } catch (e) {
+                    console.error('Error fetching favorites status:', e);
+                }
+            } else {
+                setIsFavorite(false);
+            }
+        };
+        checkFavoriteStatus();
+    }, [auth.isAuthenticated, product?.id]);
+
     const handleQty = (type) => {
         if (type === 'dec' && quantity > 1) setQuantity(q => q - 1);
         else if (type === 'inc' && quantity < (product?.stock || 1)) setQuantity(q => q + 1);
@@ -70,10 +90,25 @@ const ProductDetail = () => {
     const handleFavorite = async () => {
         if (!auth.isAuthenticated) { navigate('/login'); return; }
         setFavoriteLoading(true);
-        const res = await addFavoriteApi(product.id);
-        setFavoriteLoading(false);
-        if (res && !res.message) { notification.success({ message: '❤️ Đã thêm vào yêu thích' }); return; }
-        notification.error({ message: 'Không thể thêm yêu thích', description: res?.message });
+        if (isFavorite) {
+            const res = await removeFavoriteApi(product.id);
+            setFavoriteLoading(false);
+            if (res && !res.message) {
+                setIsFavorite(false);
+                notification.success({ message: '💔 Đã xóa khỏi yêu thích' });
+                return;
+            }
+            notification.error({ message: 'Không thể xóa yêu thích', description: res?.message });
+        } else {
+            const res = await addFavoriteApi(product.id);
+            setFavoriteLoading(false);
+            if (res && !res.message) {
+                setIsFavorite(true);
+                notification.success({ message: '❤️ Đã thêm vào yêu thích' });
+                return;
+            }
+            notification.error({ message: 'Không thể thêm yêu thích', description: res?.message });
+        }
     };
 
     const handleReview = async (e) => {
@@ -255,10 +290,32 @@ const ProductDetail = () => {
 
                                 {/* Favorite */}
                                 <button onClick={handleFavorite} disabled={favoriteLoading}
-                                    style={{ height: 44, padding: '0 16px', border: '1px solid #e5e7eb', borderRadius: 8, background: '#fff', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 6, fontSize: 13, color: '#374151', fontWeight: 500 }}
-                                    onMouseEnter={e => { e.currentTarget.style.borderColor = '#f97316'; e.currentTarget.style.color = '#f97316'; }}
-                                    onMouseLeave={e => { e.currentTarget.style.borderColor = '#e5e7eb'; e.currentTarget.style.color = '#374151'; }}>
-                                    <Heart style={{ width: 16, height: 16 }} /> Yêu thích
+                                    style={{
+                                        height: 44,
+                                        padding: '0 16px',
+                                        border: '1px solid #e5e7eb',
+                                        borderRadius: 8,
+                                        background: '#fff',
+                                        cursor: 'pointer',
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        gap: 6,
+                                        fontSize: 13,
+                                        color: isFavorite ? '#ef4444' : '#374151',
+                                        borderColor: isFavorite ? '#fee2e2' : '#e5e7eb',
+                                        fontWeight: 500,
+                                        transition: 'all 0.15s ease'
+                                    }}
+                                    onMouseEnter={e => {
+                                        e.currentTarget.style.borderColor = '#f97316';
+                                        if (!isFavorite) e.currentTarget.style.color = '#f97316';
+                                    }}
+                                    onMouseLeave={e => {
+                                        e.currentTarget.style.borderColor = isFavorite ? '#fee2e2' : '#e5e7eb';
+                                        e.currentTarget.style.color = isFavorite ? '#ef4444' : '#374151';
+                                    }}>
+                                    <Heart style={{ width: 16, height: 16, fill: isFavorite ? '#ef4444' : 'none', color: isFavorite ? '#ef4444' : 'currentColor' }} /> 
+                                    {isFavorite ? 'Đã yêu thích' : 'Yêu thích'}
                                 </button>
                             </div>
                         </div>

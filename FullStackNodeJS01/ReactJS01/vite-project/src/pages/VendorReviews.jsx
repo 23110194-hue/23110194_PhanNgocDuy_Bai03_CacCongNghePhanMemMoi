@@ -25,7 +25,7 @@ const VendorReviews = () => {
 
     const productMap = useMemo(() => {
         const map = new Map();
-        products.forEach((item) => map.set(item.id, item.title));
+        products.forEach((item) => map.set(item.id, item));
         return map;
     }, [products]);
 
@@ -125,26 +125,56 @@ const VendorReviews = () => {
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    {reviews.map((review, i) => (
-                                        <tr key={review._id} style={{ borderBottom: i < reviews.length - 1 ? '1px solid #f3f4f6' : 'none' }}>
-                                            <td style={{ padding: '11px 16px', fontWeight: 600, color: '#111', maxWidth: 180, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                                                {productMap.get(review.productId) || review.productId}
-                                            </td>
-                                            <td style={{ padding: '11px 16px', color: '#6b7280' }}>{review.userEmail}</td>
-                                            <td style={{ padding: '11px 16px' }}>
-                                                <span style={{ fontSize: 11, fontWeight: 700, padding: '3px 10px', borderRadius: 20, background: review.rating >= 4 ? '#f0fdf4' : '#fef2f2', color: review.rating >= 4 ? '#16a34a' : '#dc2626', border: `1px solid ${review.rating >= 4 ? '#bbf7d0' : '#fecaca'}` }}>
-                                                    {review.rating}/5
-                                                </span>
-                                            </td>
-                                            <td style={{ padding: '11px 16px', color: '#374151', maxWidth: 240, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{review.comment || '-'}</td>
-                                            <td style={{ padding: '11px 16px' }}>
-                                                <button type="button" onClick={() => handleToggle(review._id, !review.isVisible)}
-                                                    style={{ fontSize: 12, fontWeight: 600, padding: '5px 14px', borderRadius: 6, cursor: 'pointer', border: '1px solid', background: review.isVisible ? '#fef2f2' : '#f0fdf4', color: review.isVisible ? '#dc2626' : '#16a34a', borderColor: review.isVisible ? '#fecaca' : '#bbf7d0' }}>
-                                                    {review.isVisible ? 'Ẩn' : 'Hiện'}
-                                                </button>
-                                            </td>
-                                        </tr>
-                                    ))}
+                                    {reviews.map((review, i) => {
+                                        const prod = productMap.get(review.productId);
+                                        const prodTitle = prod?.title || review.productId;
+                                        const prodImg = prod?.images?.[0];
+                                        return (
+                                            <tr key={review._id} style={{ borderBottom: i < reviews.length - 1 ? '1px solid #f3f4f6' : 'none' }}>
+                                                <td style={{ padding: '12px 16px', maxWidth: 280 }}>
+                                                    <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+                                                        <div style={{ width: 36, height: 48, borderRadius: 4, overflow: 'hidden', border: '1px solid #e5e7eb', background: '#f9fafb', flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                                                            {prodImg ? (
+                                                                <img src={prodImg} alt={prodTitle} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                                                            ) : (
+                                                                <Package style={{ width: 14, height: 14, color: '#9ca3af' }} />
+                                                            )}
+                                                        </div>
+                                                        <div style={{ minWidth: 0 }}>
+                                                            <div style={{ fontWeight: 750, color: '#111', fontSize: 13, textOverflow: 'ellipsis', overflow: 'hidden', whiteSpace: 'nowrap', maxWidth: 200 }} title={prodTitle}>
+                                                                {prodTitle}
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </td>
+                                                <td style={{ padding: '12px 16px', color: '#6b7280', verticalAlign: 'middle' }}>{review.userEmail}</td>
+                                                <td style={{ padding: '12px 16px', verticalAlign: 'middle' }}>
+                                                    <div style={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+                                                        {[1, 2, 3, 4, 5].map((star) => (
+                                                            <Star
+                                                                key={star}
+                                                                style={{
+                                                                    width: 13,
+                                                                    height: 13,
+                                                                    fill: star <= review.rating ? '#eab308' : 'none',
+                                                                    stroke: star <= review.rating ? '#eab308' : '#d1d5db',
+                                                                }}
+                                                            />
+                                                        ))}
+                                                    </div>
+                                                </td>
+                                                <td style={{ padding: '12px 16px', color: '#374151', maxWidth: 240, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', verticalAlign: 'middle' }} title={review.comment}>
+                                                    {review.comment || '-'}
+                                                </td>
+                                                <td style={{ padding: '12px 16px', verticalAlign: 'middle' }}>
+                                                    <button type="button" onClick={() => handleToggle(review._id, !review.isVisible)}
+                                                        style={{ fontSize: 12, fontWeight: 600, padding: '5px 14px', borderRadius: 6, cursor: 'pointer', border: '1px solid', background: review.isVisible ? '#fef2f2' : '#f0fdf4', color: review.isVisible ? '#dc2626' : '#16a34a', borderColor: review.isVisible ? '#fecaca' : '#bbf7d0' }}>
+                                                        {review.isVisible ? 'Ẩn' : 'Hiện'}
+                                                    </button>
+                                                </td>
+                                            </tr>
+                                        );
+                                    })}
                                 </tbody>
                             </table>
                         </div>

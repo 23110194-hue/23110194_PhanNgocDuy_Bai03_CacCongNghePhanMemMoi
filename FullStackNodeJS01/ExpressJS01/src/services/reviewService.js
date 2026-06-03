@@ -85,15 +85,23 @@ const listShopReviews = async (shopId) => {
 };
 
 
-const updateReviewVisibility = async (reviewId, isVisible) => {
-    const review = await ProductReview.findByIdAndUpdate(
-        reviewId,
-        { isVisible: Boolean(isVisible) },
-        { new: true }
-    );
+const updateReviewVisibility = async (reviewId, isVisible, shopId = null) => {
+    const review = await ProductReview.findById(reviewId);
     if (!review) {
         return { error: 'Không tìm thấy đánh giá.' };
     }
+
+    // Nếu có shopId, kiểm tra review thuộc sản phẩm của shop đó
+    if (shopId) {
+        const Product = require('../models/product');
+        const product = await Product.findOne({ id: review.productId, shopId });
+        if (!product) {
+            return { error: 'Bạn không có quyền chỉnh sửa đánh giá này.' };
+        }
+    }
+
+    review.isVisible = Boolean(isVisible);
+    await review.save();
     return review;
 };
 

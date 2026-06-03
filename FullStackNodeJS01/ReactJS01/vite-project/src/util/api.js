@@ -123,6 +123,9 @@ const getVendorOrdersApi = () =>
 const updateVendorOrderStatusApi = (orderId, status, note = '') =>
     axios.patch(`/v1/api/vendor/orders/${orderId}/status`, { status, note });
 
+const handleVendorCancelRequestApi = (orderId, accept, note = '') =>
+    axios.patch(`/v1/api/vendor/orders/${orderId}/cancel-request`, { accept, note });
+
 const getVendorRevenueApi = () =>
     axios.get('/v1/api/vendor/revenue');
 
@@ -210,6 +213,7 @@ export {
     removeVendorProductApi,
     getVendorOrdersApi,
     updateVendorOrderStatusApi,
+    handleVendorCancelRequestApi,
     getVendorRevenueApi,
     getVendorReviewsApi,
     updateVendorReviewVisibilityApi,

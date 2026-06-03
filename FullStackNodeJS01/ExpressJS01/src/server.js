@@ -11,7 +11,19 @@ const { seedProductsIfEmpty } = require('./services/productService');
 const app = express();
 const port = process.env.PORT || 8888;
 
-app.use(cors());
+const allowedOrigins = process.env.ALLOWED_ORIGINS
+    ? process.env.ALLOWED_ORIGINS.split(',').map((o) => o.trim())
+    : ['http://localhost:5173', 'http://localhost:3000'];
+
+app.use(cors({
+    origin: (origin, callback) => {
+        // Cho phép requests không có origin (ví dụ: Postman, mobile app)
+        if (!origin) return callback(null, true);
+        if (allowedOrigins.includes(origin)) return callback(null, true);
+        callback(new Error(`CORS: Origin "${origin}" không được phép.`));
+    },
+    credentials: true,
+}));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
@@ -34,6 +46,20 @@ app.use('/v1/api/', apiRoutes);
         );
         if (migrateResult.modifiedCount > 0) {
             console.log(`>>> Migration: đã kích hoạt ${migrateResult.modifiedCount} user cũ`);
+        }
+
+        // Migration: Lowercase all roles in DB
+        const usersToMigrate = await User.find({ role: { $exists: true } });
+        let updatedRolesCount = 0;
+        for (const u of usersToMigrate) {
+            if (u.role && u.role !== u.role.toLowerCase()) {
+                u.role = u.role.toLowerCase();
+                await u.save();
+                updatedRolesCount++;
+            }
+        }
+        if (updatedRolesCount > 0) {
+            console.log(`>>> Migration: đã chuyển đổi ${updatedRolesCount} user sang role chữ thường`);
         }
 
         await seedProductsIfEmpty();

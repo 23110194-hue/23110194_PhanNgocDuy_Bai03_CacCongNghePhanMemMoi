@@ -19,6 +19,8 @@ const RegisterPage = () => {
     const [loading, setLoading] = useState(false);
     const [resendLoading, setResendLoading] = useState(false);
 
+    const [registeredPassword, setRegisteredPassword] = useState('');
+
     const onRegisterFinish = async (values) => {
         const { name, email, password } = values;
         setLoading(true);
@@ -27,6 +29,7 @@ const RegisterPage = () => {
         if (res && res.EC === 0) {
             notification.success({ message: 'Gửi OTP thành công', description: res.EM });
             setRegisteredEmail(email);
+            setRegisteredPassword(password);
             setCurrentStep(1);
         } else {
             notification.error({ message: 'Đăng ký thất bại', description: res?.EM ?? 'Đã xảy ra lỗi' });
@@ -46,9 +49,13 @@ const RegisterPage = () => {
     };
 
     const handleResendOTP = async () => {
+        if (!registeredEmail || !registeredPassword) {
+            notification.warning({ message: 'Không thể gửi lại OTP', description: 'Vui lòng quay lại bước 1.' });
+            return;
+        }
         setResendLoading(true);
         const values = form.getFieldsValue();
-        const res = await createUserApi(values.name, registeredEmail, values.password);
+        const res = await createUserApi(values.name || registeredEmail, registeredEmail, registeredPassword);
         setResendLoading(false);
         if (res && res.EC === 0) notification.success({ message: 'Đã gửi lại OTP', description: res.EM });
         else notification.error({ message: 'Lỗi', description: res?.EM });

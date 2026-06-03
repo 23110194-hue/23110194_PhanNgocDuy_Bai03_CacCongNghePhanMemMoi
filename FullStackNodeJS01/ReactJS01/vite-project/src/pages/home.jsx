@@ -1,14 +1,50 @@
 import React, { useContext, useEffect, useState } from 'react';
+import bannerBg from '../assets/hero_banner_bg.png';
+import bannerBg2 from '../assets/hero_banner_bg_2.png';
+import bannerBg3 from '../assets/hero_banner_bg_3.png';
 import { getProductsApi } from '../util/api';
 import ProductCard from '../components/ProductCard';
 import { Link } from 'react-router-dom';
-import { ArrowRight, Flame, Sparkles, Tag, Eye } from 'lucide-react';
+import { ArrowRight, Flame, Sparkles, Tag, Eye, ChevronLeft, ChevronRight } from 'lucide-react';
 import { AuthContext } from '../components/context/auth.context';
 import { Swiper, SwiperSlide } from 'swiper/react';
 import { Navigation } from 'swiper/modules';
 import 'swiper/css';
 import 'swiper/css/navigation';
 import './swiper-custom.css';
+
+const SLIDES = [
+    {
+        bg: bannerBg,
+        subtitle: 'BOOKSTORE — THƯ VIỆN TRI THỨC',
+        title: <>Sách Mới Xuất Bản<br />Flash Sale Tới 30%</>,
+        desc: 'Hàng ngàn đầu sách chất lượng cao, cập nhật mỗi tuần.',
+        btnText: 'Mua sắm ngay',
+        btnLink: '/products',
+        btnText2: 'Xem khuyến mãi',
+        btnLink2: '/products?promo=true'
+    },
+    {
+        bg: bannerBg2,
+        subtitle: 'THẾ GIỚI KỲ DIỆU',
+        title: <>Khám Phá Vũ Trụ Sách<br />Ưu Đãi Độc Giả Thân Thiết</>,
+        desc: 'Mở ra thế giới tri thức vô hạn, đồng hành cùng tương lai.',
+        btnText: 'Khám phá ngay',
+        btnLink: '/products?sort=best',
+        btnText2: 'Sách mới nhất',
+        btnLink2: '/products?sort=newest'
+    },
+    {
+        bg: bannerBg3,
+        subtitle: 'GÓC HỌC TẬP VÀ LÀM VIỆC',
+        title: <>Kiến Tạo Không Gian<br />Nâng Tầm Tri Thức Mới</>,
+        desc: 'Trang bị tài liệu học tập, nghiên cứu và phát triển kỹ năng toàn diện.',
+        btnText: 'Xem sách kỹ năng',
+        btnLink: '/products?category=K%E1%BB%B9+n%C4%83ng',
+        btnText2: 'Xem nhiều nhất',
+        btnLink2: '/products?sort=viewed'
+    }
+];
 
 const HomePage = () => {
     const { auth } = useContext(AuthContext);
@@ -17,6 +53,9 @@ const HomePage = () => {
     const [bestProducts, setBestProducts]     = useState([]);
     const [viewedProducts, setViewedProducts] = useState([]);
     const [loading, setLoading] = useState(true);
+    
+    // Slide index state
+    const [currentSlide, setCurrentSlide] = useState(0);
 
     useEffect(() => {
         const fetch = async () => {
@@ -36,6 +75,22 @@ const HomePage = () => {
         };
         fetch();
     }, []);
+
+    // 20 seconds auto transition effect
+    useEffect(() => {
+        const interval = setInterval(() => {
+            setCurrentSlide(prev => (prev + 1) % SLIDES.length);
+        }, 20000);
+        return () => clearInterval(interval);
+    }, []);
+
+    const handlePrevSlide = () => {
+        setCurrentSlide(prev => (prev - 1 + SLIDES.length) % SLIDES.length);
+    };
+
+    const handleNextSlide = () => {
+        setCurrentSlide(prev => (prev + 1) % SLIDES.length);
+    };
 
     /* ── Product section component ── */
     const Section = ({ title, products, viewAllLink }) => (
@@ -88,37 +143,155 @@ const HomePage = () => {
                 <div className="container" style={{ padding: '20px 16px' }}>
                     <div style={{ display: 'grid', gridTemplateColumns: '1fr 280px', gap: 16, alignItems: 'stretch' }}>
 
-                        {/* Banner chính */}
+                        {/* Banner chính (Slider) */}
                         <div style={{
-                            background: 'linear-gradient(135deg, #f97316 0%, #ea580c 100%)',
-                            borderRadius: 10, padding: '32px 40px', color: '#fff',
-                            display: 'flex', flexDirection: 'column', justifyContent: 'center', minHeight: 200
+                            position: 'relative',
+                            borderRadius: 10,
+                            overflow: 'hidden',
+                            minHeight: 220,
+                            display: 'flex',
+                            alignItems: 'stretch'
                         }}>
-                            <div style={{ fontSize: 12, fontWeight: 600, letterSpacing: '0.1em', opacity: 0.85 }}>
-                                BOOKSTORE — THƯ VIỆN TRI THỨC
-                            </div>
-                            <h1 style={{ fontSize: 28, fontWeight: 800, lineHeight: 1.3, margin: '10px 0 8px' }}>
-                                Sách Mới Xuất Bản<br />Flash Sale Tới 30%
-                            </h1>
-                            <p style={{ fontSize: 14, opacity: 0.9, marginBottom: 20 }}>
-                                Hàng ngàn đầu sách chất lượng cao, cập nhật mỗi tuần.
-                            </p>
-                            <div style={{ display: 'flex', gap: 10 }}>
-                                <Link to="/products" style={{
-                                    background: '#fff', color: '#f97316',
-                                    borderRadius: 6, padding: '9px 20px',
-                                    fontWeight: 700, fontSize: 13
-                                }}>
-                                    Mua sắm ngay
-                                </Link>
-                                <Link to="/products?promo=true" style={{
-                                    background: 'rgba(255,255,255,0.2)', color: '#fff',
-                                    border: '1px solid rgba(255,255,255,0.5)',
-                                    borderRadius: 6, padding: '9px 20px',
-                                    fontWeight: 600, fontSize: 13
-                                }}>
-                                    Xem khuyến mãi
-                                </Link>
+                            {SLIDES.map((slide, index) => {
+                                const isActive = currentSlide === index;
+                                return (
+                                    <div
+                                        key={index}
+                                        style={{
+                                            position: index === 0 ? 'relative' : 'absolute',
+                                            inset: 0,
+                                            width: '100%',
+                                            height: '100%',
+                                            backgroundImage: `linear-gradient(90deg, rgba(249, 115, 22, 0.96) 0%, rgba(234, 88, 12, 0.82) 45%, rgba(0, 0, 0, 0.15) 100%), url(${slide.bg})`,
+                                            backgroundSize: 'cover',
+                                            backgroundPosition: 'center',
+                                            padding: '32px 40px',
+                                            color: '#fff',
+                                            display: 'flex',
+                                            flexDirection: 'column',
+                                            justifyContent: 'center',
+                                            opacity: isActive ? 1 : 0,
+                                            transition: 'opacity 0.8s ease-in-out',
+                                            zIndex: isActive ? 2 : 1,
+                                            boxSizing: 'border-box',
+                                            pointerEvents: isActive ? 'auto' : 'none',
+                                        }}
+                                    >
+                                        <div style={{ fontSize: 12, fontWeight: 600, letterSpacing: '0.1em', opacity: 0.85 }}>
+                                            {slide.subtitle}
+                                        </div>
+                                        <h1 style={{ fontSize: 28, fontWeight: 800, lineHeight: 1.3, margin: '10px 0 8px' }}>
+                                            {slide.title}
+                                        </h1>
+                                        <p style={{ fontSize: 14, opacity: 0.9, marginBottom: 20 }}>
+                                            {slide.desc}
+                                        </p>
+                                        <div style={{ display: 'flex', gap: 10 }}>
+                                            <Link to={slide.btnLink} style={{
+                                                background: '#fff', color: '#f97316',
+                                                borderRadius: 6, padding: '9px 20px',
+                                                fontWeight: 700, fontSize: 13,
+                                                textDecoration: 'none'
+                                            }}>
+                                                {slide.btnText}
+                                            </Link>
+                                            <Link to={slide.btnLink2} style={{
+                                                background: 'rgba(255,255,255,0.2)', color: '#fff',
+                                                border: '1px solid rgba(255,255,255,0.5)',
+                                                borderRadius: 6, padding: '9px 20px',
+                                                fontWeight: 600, fontSize: 13,
+                                                textDecoration: 'none'
+                                            }}>
+                                                {slide.btnText2}
+                                            </Link>
+                                        </div>
+                                    </div>
+                                );
+                            })}
+
+                            {/* Left Navigation Arrow */}
+                            <button
+                                type="button"
+                                onClick={handlePrevSlide}
+                                style={{
+                                    position: 'absolute',
+                                    left: 12,
+                                    top: '50%',
+                                    transform: 'translateY(-50%)',
+                                    width: 32,
+                                    height: 32,
+                                    borderRadius: '50%',
+                                    background: 'rgba(255, 255, 255, 0.2)',
+                                    border: 'none',
+                                    color: '#fff',
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    justifyContent: 'center',
+                                    cursor: 'pointer',
+                                    zIndex: 10,
+                                    transition: 'background 0.2s',
+                                }}
+                                onMouseEnter={e => e.currentTarget.style.background = 'rgba(255, 255, 255, 0.4)'}
+                                onMouseLeave={e => e.currentTarget.style.background = 'rgba(255, 255, 255, 0.2)'}
+                            >
+                                <ChevronLeft style={{ width: 18, height: 18 }} />
+                            </button>
+
+                            {/* Right Navigation Arrow */}
+                            <button
+                                type="button"
+                                onClick={handleNextSlide}
+                                style={{
+                                    position: 'absolute',
+                                    right: 12,
+                                    top: '50%',
+                                    transform: 'translateY(-50%)',
+                                    width: 32,
+                                    height: 32,
+                                    borderRadius: '50%',
+                                    background: 'rgba(255, 255, 255, 0.2)',
+                                    border: 'none',
+                                    color: '#fff',
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    justifyContent: 'center',
+                                    cursor: 'pointer',
+                                    zIndex: 10,
+                                    transition: 'background 0.2s',
+                                }}
+                                onMouseEnter={e => e.currentTarget.style.background = 'rgba(255, 255, 255, 0.4)'}
+                                onMouseLeave={e => e.currentTarget.style.background = 'rgba(255, 255, 255, 0.2)'}
+                            >
+                                <ChevronRight style={{ width: 18, height: 18 }} />
+                            </button>
+
+                            {/* Dot Indicators */}
+                            <div style={{
+                                position: 'absolute',
+                                bottom: 12,
+                                left: '50%',
+                                transform: 'translateX(-50%)',
+                                display: 'flex',
+                                gap: 6,
+                                zIndex: 10
+                            }}>
+                                {SLIDES.map((_, index) => (
+                                    <button
+                                        key={index}
+                                        type="button"
+                                        onClick={() => setCurrentSlide(index)}
+                                        style={{
+                                            width: 8,
+                                            height: 8,
+                                            borderRadius: '50%',
+                                            background: currentSlide === index ? '#fff' : 'rgba(255, 255, 255, 0.4)',
+                                            border: 'none',
+                                            cursor: 'pointer',
+                                            padding: 0,
+                                            transition: 'background 0.2s'
+                                        }}
+                                    />
+                                ))}
                             </div>
                         </div>
 

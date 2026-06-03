@@ -169,26 +169,126 @@ const updateVendorOrderStatus = async (ownerId, orderId, status, note) => {
     return updateOrderStatusService(orderId, status, note);
 };
 
+const handleVendorCancelRequest = async (ownerId, orderId, accept, note) => {
+    const shop = await getShopByOwner(ownerId);
+    if (!shop) return { error: 'Shop chưa đăng ký.' };
+
+    const order = await Order.findById(orderId);
+    if (!order) return { error: 'Đơn hàng không tồn tại.' };
+
+    const hasItem = order.items.some((item) => String(item.shopId) === String(shop._id));
+    if (!hasItem) return { error: 'Bạn không có quyền xử lý đơn hàng này.' };
+
+    if (!order.cancelRequested) {
+        return { error: 'Đơn hàng này không có yêu cầu hủy.' };
+    }
+
+    if (accept) {
+        // Đồng ý hủy → chuyển sang CANCELED + hoàn kho
+        order.status = 'CANCELED';
+        order.canceledAt = new Date();
+        order.cancelRequested = false;
+        order.timeline.push({
+            status: 'CANCELED',
+            at: new Date(),
+            note: note || 'Vendor đồng ý hủy đơn theo yêu cầu khách hàng.',
+        });
+        await order.save();
+
+        await Promise.all(
+            order.items.map((item) =>
+                Product.updateOne(
+                    { id: item.productId },
+                    { $inc: { stock: item.quantity } }
+                ).catch(() => {})
+            )
+        );
+    } else {
+        // Từ chối hủy → giữ nguyên trạng thái, reset flag
+        order.cancelRequested = false;
+        order.timeline.push({
+            status: order.status,
+            at: new Date(),
+            note: note || 'Vendor từ chối yêu cầu hủy đơn.',
+        });
+        await order.save();
+    }
+
+    return order.toObject ? { ...order.toObject(), cancelRequested: order.cancelRequested } : order;
+};
+
 const getVendorRevenue = async (ownerId) => {
     const shop = await getShopByOwner(ownerId);
     if (!shop) return { error: 'Shop chưa đăng ký.' };
 
     const orders = await Order.find({ status: 'DELIVERED', 'items.shopId': shop._id });
-    const revenue = orders.reduce((acc, order) => {
-        const sum = order.items
-            .filter((item) => String(item.shopId) === String(shop._id))
-            .reduce((total, item) => total + item.lineTotal, 0);
-        return acc + sum;
-    }, 0);
+    
+    let revenue = 0;
+    const dailyMap = {};
+    const productStats = {};
 
-    return { shop, revenue, totalOrders: orders.length };
+    orders.forEach((order) => {
+        const dateObj = order.deliveredAt || order.updatedAt || new Date();
+        const dateStr = new Date(dateObj).toISOString().split('T')[0];
+        
+        let orderShopTotal = 0;
+        order.items.forEach((item) => {
+            if (String(item.shopId) === String(shop._id)) {
+                const itemTotal = item.lineTotal;
+                orderShopTotal += itemTotal;
+
+                if (!productStats[item.productId]) {
+                    productStats[item.productId] = {
+                        id: item.productId,
+                        title: item.title,
+                        image: item.image,
+                        quantity: 0,
+                        revenue: 0,
+                    };
+                }
+                productStats[item.productId].quantity += item.quantity;
+                productStats[item.productId].revenue += itemTotal;
+            }
+        });
+
+        revenue += orderShopTotal;
+        dailyMap[dateStr] = (dailyMap[dateStr] || 0) + orderShopTotal;
+    });
+
+    // Last 7 days
+    const dailyRevenue = [];
+    for (let i = 6; i >= 0; i--) {
+        const d = new Date();
+        d.setDate(d.getDate() - i);
+        const dateStr = d.toISOString().split('T')[0];
+        dailyRevenue.push({
+            date: dateStr,
+            revenue: dailyMap[dateStr] || 0,
+        });
+    }
+
+    // Top 5 products
+    const topProducts = Object.values(productStats)
+        .sort((a, b) => b.quantity - a.quantity)
+        .slice(0, 5);
+
+    const averageOrderValue = orders.length > 0 ? Math.round(revenue / orders.length) : 0;
+
+    return { 
+        shop, 
+        revenue, 
+        totalOrders: orders.length,
+        dailyRevenue,
+        topProducts,
+        averageOrderValue,
+    };
 };
 
 const listVendorReviews = async (ownerId) => {
     const shop = await getShopByOwner(ownerId);
     if (!shop) return { error: 'Shop chưa đăng ký.' };
 
-    const products = await Product.find({ shopId: shop._id }).select('id title');
+    const products = await Product.find({ shopId: shop._id }).select('id title images');
     const productIds = products.map((item) => item.id);
 
     const reviews = await ProductReview.find({ productId: { $in: productIds } }).sort({ createdAt: -1 });
@@ -199,7 +299,7 @@ const listVendorFavorites = async (ownerId) => {
     const shop = await getShopByOwner(ownerId);
     if (!shop) return { error: 'Shop chưa đăng ký.' };
 
-    const products = await Product.find({ shopId: shop._id }).select('id title');
+    const products = await Product.find({ shopId: shop._id }).select('id title images');
     const productIds = products.map((item) => item.id);
 
     const favorites = await Favorite.aggregate([
@@ -228,6 +328,7 @@ module.exports = {
     removeVendorProduct,
     listVendorOrders,
     updateVendorOrderStatus,
+    handleVendorCancelRequest,
     getVendorRevenue,
     listVendorReviews,
     listVendorFavorites,

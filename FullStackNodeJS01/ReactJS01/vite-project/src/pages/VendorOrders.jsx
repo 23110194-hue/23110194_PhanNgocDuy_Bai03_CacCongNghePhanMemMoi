@@ -2,7 +2,7 @@ import React, { useContext, useEffect, useMemo, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { notification } from 'antd';
 import { AuthContext } from '../components/context/auth.context';
-import { getVendorOrdersApi, updateVendorOrderStatusApi } from '../util/api';
+import { getVendorOrdersApi, updateVendorOrderStatusApi, handleVendorCancelRequestApi } from '../util/api';
 import { formatCurrency, formatDate } from '../util/format';
 import DashboardLayout from '../components/layout/DashboardLayout';
 import { Store, Package, ShoppingBag, Star, DollarSign, Heart, Eye, ChevronLeft, ChevronRight, RefreshCw, Clock, CheckCircle, Truck, AlertCircle } from 'lucide-react';
@@ -104,10 +104,24 @@ const VendorOrders = () => {
         notification.error({ message: 'Không thể cập nhật', description: res?.message });
     };
 
+    const handleCancelRequest = async (orderId, accept) => {
+        const note = noteDrafts[orderId] || '';
+        const res = await handleVendorCancelRequestApi(orderId, accept, note);
+        if (res && !res.message) {
+            notification.success({
+                message: accept ? '✅ Đã đồng ý hủy đơn.' : '✅ Đã từ chối yêu cầu hủy.',
+            });
+            fetchOrders();
+            setNoteDrafts(p => ({ ...p, [orderId]: '' }));
+            return;
+        }
+        notification.error({ message: 'Không thể xử lý yêu cầu', description: res?.message });
+    };
+
     const handleMenuClick = (key) => { if (key !== 'orders') navigate(`/vendor/${key}`); };
     const handleLogout = () => {
         setAuth({ isAuthenticated: false, user: null, token: null });
-        localStorage.removeItem('token');
+        localStorage.removeItem('access_token');
         navigate('/login');
     };
 
@@ -227,6 +241,43 @@ const VendorOrders = () => {
                                             </Link>
                                         </div>
                                     </div>
+
+                                    {/* Cancel request banner */}
+                                    {order.cancelRequested && (
+                                        <div style={{ padding: '12px 20px', background: '#fef3c7', borderTop: '1px solid #fde68a', borderBottom: '1px solid #fde68a' }}>
+                                            <div style={{ display: 'flex', alignItems: 'flex-start', gap: 10, flexWrap: 'wrap' }}>
+                                                <AlertCircle style={{ width: 18, height: 18, color: '#d97706', flexShrink: 0, marginTop: 1 }} />
+                                                <div style={{ flex: 1 }}>
+                                                    <div style={{ fontWeight: 700, fontSize: 13, color: '#92400e', marginBottom: 4 }}>⚠️ Khách hàng gửi yêu cầu hủy đơn</div>
+                                                    <input
+                                                        type="text"
+                                                        value={noteDrafts[order._id] || ''}
+                                                        onChange={e => handleNoteChange(order._id, e.target.value)}
+                                                        style={{ width: '100%', border: '1.5px solid #fcd34d', borderRadius: 8, padding: '6px 12px', fontSize: 13, outline: 'none', background: '#fffbeb', marginBottom: 8 }}
+                                                        placeholder="Ghi chú phản hồi (tùy chọn)..."
+                                                    />
+                                                    <div style={{ display: 'flex', gap: 8 }}>
+                                                        <button
+                                                            onClick={() => handleCancelRequest(order._id, true)}
+                                                            style={{ padding: '7px 18px', borderRadius: 8, border: 'none', background: '#dc2626', color: '#fff', fontWeight: 700, fontSize: 13, cursor: 'pointer' }}
+                                                            onMouseEnter={e => e.currentTarget.style.background = '#b91c1c'}
+                                                            onMouseLeave={e => e.currentTarget.style.background = '#dc2626'}
+                                                        >
+                                                            ✓ Đồng ý hủy đơn
+                                                        </button>
+                                                        <button
+                                                            onClick={() => handleCancelRequest(order._id, false)}
+                                                            style={{ padding: '7px 18px', borderRadius: 8, border: '1.5px solid #d97706', background: '#fff', color: '#d97706', fontWeight: 700, fontSize: 13, cursor: 'pointer' }}
+                                                            onMouseEnter={e => { e.currentTarget.style.background = '#fef3c7'; }}
+                                                            onMouseLeave={e => { e.currentTarget.style.background = '#fff'; }}
+                                                        >
+                                                            ✗ Từ chối hủy
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    )}
 
                                     {/* Status update row */}
                                     {nextStatuses.length > 0 && (

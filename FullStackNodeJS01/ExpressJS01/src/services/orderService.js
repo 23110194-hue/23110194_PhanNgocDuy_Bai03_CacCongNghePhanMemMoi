@@ -121,7 +121,6 @@ const createOrderService = async (userEmail, shippingAddress) => {
         });
     }
 
-    const summary = buildSummary(orderItems);
     const user = await User.findOne({ email: userEmail }).select('name email');
 
     // Trừ tồn kho nguyên tử (Atomic Deduction) - Đảm bảo không bị bán âm

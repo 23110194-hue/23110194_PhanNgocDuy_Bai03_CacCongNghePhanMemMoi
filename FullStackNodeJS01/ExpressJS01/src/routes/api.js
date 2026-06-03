@@ -54,6 +54,7 @@ const {
     removeVendorProductHandler,
     getVendorOrders,
     updateVendorOrderStatusHandler,
+    handleVendorCancelRequestHandler,
     getVendorRevenueHandler,
     getVendorReviews,
     updateVendorReviewVisibility,
@@ -101,7 +102,7 @@ routerAPI.post('/verify-forgot-password', otpLimiter, validateResetPassword, han
 routerAPI.get('/account', delay, getAccount);
 routerAPI.get('/user', authorizeRole('admin'), getUser);
 routerAPI.get('/user/profile', authorizeRole('user', 'admin'), getUserProfile);
-routerAPI.patch('/user/profile', updateProfile);
+routerAPI.patch('/user/profile', authorizeRole('user', 'vendor', 'manager', 'admin'), updateProfile);
 routerAPI.get('/admin/profile', authorizeRole('admin'), getAdminProfile);
 
 routerAPI.get('/products', apiGetProducts);
@@ -142,6 +143,7 @@ routerAPI.patch('/vendor/products/:productId', authorizeRole('vendor'), updateVe
 routerAPI.delete('/vendor/products/:productId', authorizeRole('vendor'), removeVendorProductHandler);
 routerAPI.get('/vendor/orders', authorizeRole('vendor'), getVendorOrders);
 routerAPI.patch('/vendor/orders/:orderId/status', authorizeRole('vendor'), updateVendorOrderStatusHandler);
+routerAPI.patch('/vendor/orders/:orderId/cancel-request', authorizeRole('vendor'), handleVendorCancelRequestHandler);
 routerAPI.get('/vendor/revenue', authorizeRole('vendor'), getVendorRevenueHandler);
 routerAPI.get('/vendor/reviews', authorizeRole('vendor'), getVendorReviews);
 routerAPI.patch('/vendor/reviews/:reviewId', authorizeRole('vendor'), updateVendorReviewVisibility);

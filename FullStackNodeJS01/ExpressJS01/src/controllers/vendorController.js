@@ -5,6 +5,7 @@ const {
     removeVendorProduct,
     listVendorOrders,
     updateVendorOrderStatus,
+    handleVendorCancelRequest,
     getVendorRevenue,
     listVendorReviews,
     listVendorFavorites,
@@ -90,6 +91,21 @@ const updateVendorOrderStatusHandler = async (req, res) => {
     }
 };
 
+const handleVendorCancelRequestHandler = async (req, res) => {
+    try {
+        const { accept, note } = req.body;
+        if (typeof accept !== 'boolean') {
+            return res.status(400).json({ message: 'Thiếu thông tin: accept (true/false) là bắt buộc.' });
+        }
+        const data = await handleVendorCancelRequest(req.user.id, req.params.orderId, accept, note);
+        if (data.error) return res.status(400).json({ message: data.error });
+        return res.status(200).json(data);
+    } catch (error) {
+        console.error('handleVendorCancelRequest error:', error);
+        return res.status(500).json({ message: 'Lỗi server, vui lòng thử lại sau.' });
+    }
+};
+
 const getVendorRevenueHandler = async (req, res) => {
     try {
         const data = await getVendorRevenue(req.user.id);
@@ -114,7 +130,11 @@ const getVendorReviews = async (req, res) => {
 
 const updateVendorReviewVisibility = async (req, res) => {
     try {
-        const data = await updateReviewVisibility(req.params.reviewId, req.body.isVisible);
+        const { getShopByOwner } = require('../services/shopService');
+        const shop = await getShopByOwner(req.user.id);
+        if (!shop) return res.status(400).json({ message: 'Shop chưa đăng ký.' });
+
+        const data = await updateReviewVisibility(req.params.reviewId, req.body.isVisible, shop._id);
         if (data.error) return res.status(400).json({ message: data.error });
         return res.status(200).json(data);
     } catch (error) {
@@ -142,6 +162,7 @@ module.exports = {
     removeVendorProductHandler,
     getVendorOrders,
     updateVendorOrderStatusHandler,
+    handleVendorCancelRequestHandler,
     getVendorRevenueHandler,
     getVendorReviews,
     updateVendorReviewVisibility,

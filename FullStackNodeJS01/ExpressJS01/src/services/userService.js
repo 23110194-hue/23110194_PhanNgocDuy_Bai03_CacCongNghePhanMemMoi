@@ -76,7 +76,8 @@ const loginService = async (email, password) => {
             return { EC: 2, EM: 'Email hoặc mật khẩu không hợp lệ' };
         }
 
-        const payload = { id: user._id, email: user.email, name: user.name, role: user.role };
+        const userRole = (user.role || 'user').toLowerCase();
+        const payload = { id: user._id, email: user.email, name: user.name, role: userRole };
         const access_token = jwt.sign(payload, process.env.JWT_SECRET, {
             expiresIn: process.env.JWT_EXPIRE,
         });
@@ -87,12 +88,12 @@ const loginService = async (email, password) => {
             manager: '/manager/vendors',
             user: '/',
         };
-        const redirectUrl = redirectByRole[user.role] || '/';
+        const redirectUrl = redirectByRole[userRole] || '/';
 
         return {
             EC: 0,
             access_token,
-            user: { id: user._id, email: user.email, name: user.name, role: user.role },
+            user: { id: user._id, email: user.email, name: user.name, role: userRole },
             redirectUrl,
         };
     } catch (error) {

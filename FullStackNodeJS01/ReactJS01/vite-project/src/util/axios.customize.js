@@ -6,7 +6,10 @@ const instance = axios.create({
 
 instance.interceptors.request.use(
     (config) => {
-        config.headers.Authorization = `Bearer ${localStorage.getItem('access_token')}`;
+        const token = localStorage.getItem('access_token');
+        if (token) {
+            config.headers.Authorization = `Bearer ${token}`;
+        }
         return config;
     },
     (error) => Promise.reject(error)
@@ -14,7 +17,7 @@ instance.interceptors.request.use(
 
 instance.interceptors.response.use(
     (response) => {
-        if (response && response.data) return response.data;
+        if (response && response.data !== undefined) return response.data;
         return response;
     },
     (error) => {

@@ -1,10 +1,10 @@
-﻿import React, { useEffect, useState, useCallback, useRef } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { getProductsApi } from '../util/api';
 import ProductCard from '../components/ProductCard';
-import { Filter, SlidersHorizontal, SearchX, Loader2 } from 'lucide-react';
+import { Filter, SlidersHorizontal, SearchX, Loader2, ChevronLeft, ChevronRight } from 'lucide-react';
 
-const LIMIT = 4;
+const LIMIT = 8;
 
 const categories = ['all', 'Kỹ năng', 'Tiểu thuyết', 'Kinh doanh', 'Giáo dục', 'Thiếu nhi'];
 
@@ -12,11 +12,8 @@ const Products = () => {
     const [searchParams, setSearchParams] = useSearchParams();
     const [products, setProducts] = useState([]);
     const [loading, setLoading] = useState(true);
-    const [loadingMore, setLoadingMore] = useState(false);
     const [total, setTotal] = useState(0);
-    const [page, setPage] = useState(1);
-    const [hasMore, setHasMore] = useState(true);
-    const observer = useRef();
+    const [totalPages, setTotalPages] = useState(0);
 
     const [q, setQ] = useState(searchParams.get('q') || '');
     const [category, setCategory] = useState(searchParams.get('category') || 'all');
@@ -26,6 +23,9 @@ const Products = () => {
     const [promo, setPromo] = useState(searchParams.get('promo') === 'true');
     const [sort, setSort] = useState(searchParams.get('sort') || 'newest');
 
+    // Page from query params
+    const page = Number(searchParams.get('page')) || 1;
+
     useEffect(() => {
         setQ(searchParams.get('q') || '');
         setCategory(searchParams.get('category') || 'all');
@@ -34,30 +34,25 @@ const Products = () => {
         setInStock(searchParams.get('inStock') === 'true');
         setPromo(searchParams.get('promo') === 'true');
         setSort(searchParams.get('sort') || 'newest');
-        setPage(1);
-        setProducts([]);
-        setHasMore(true);
     }, [searchParams]);
 
     useEffect(() => {
         let isSubscribed = true;
         const fetchProducts = async () => {
-            if (page === 1) setLoading(true);
-            else setLoadingMore(true);
+            setLoading(true);
             try {
                 const params = { ...Object.fromEntries([...searchParams]), page, limit: LIMIT };
                 const res = await getProductsApi(params);
-                if (isSubscribed && res?.items) {
-                    setProducts(prev => page === 1 ? res.items : [...prev, ...res.items]);
-                    setTotal(res.total);
-                    setHasMore(page < res.totalPages);
+                if (isSubscribed && res) {
+                    setProducts(res.items || []);
+                    setTotal(res.total || 0);
+                    setTotalPages(res.totalPages || 0);
                 }
             } catch (error) {
                 console.error('Error fetching products:', error);
             } finally {
                 if (isSubscribed) {
                     setLoading(false);
-                    setLoadingMore(false);
                 }
             }
         };
@@ -65,17 +60,6 @@ const Products = () => {
         fetchProducts();
         return () => { isSubscribed = false; };
     }, [searchParams, page]);
-
-    const lastProductElementRef = useCallback(node => {
-        if (loading || loadingMore) return;
-        if (observer.current) observer.current.disconnect();
-        observer.current = new IntersectionObserver(entries => {
-            if (entries[0].isIntersecting && hasMore) {
-                setPage(prev => prev + 1);
-            }
-        });
-        if (node) observer.current.observe(node);
-    }, [loading, loadingMore, hasMore]);
 
     const handleApplyFilters = (e) => {
         e?.preventDefault();
@@ -87,7 +71,117 @@ const Products = () => {
         if (inStock) params.set('inStock', 'true');
         if (promo) params.set('promo', 'true');
         if (sort && sort !== 'newest') params.set('sort', sort);
+        params.set('page', '1'); // Reset to page 1
         setSearchParams(params);
+    };
+
+    const handlePageChange = (newPage) => {
+        if (newPage < 1 || newPage > totalPages) return;
+        const params = new URLSearchParams(searchParams);
+        params.set('page', newPage.toString());
+        setSearchParams(params);
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    };
+
+    const renderPagination = () => {
+        if (totalPages === 0) return null;
+
+        const pages = [];
+        for (let i = 1; i <= totalPages; i++) {
+            pages.push(i);
+        }
+
+        return (
+            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 12, marginTop: 40 }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                    {/* Prev Button */}
+                    <button
+                        type="button"
+                        onClick={() => handlePageChange(page - 1)}
+                        disabled={page === 1}
+                        style={{
+                            height: 38,
+                            padding: '0 14px',
+                            borderRadius: 10,
+                            border: '1px solid #e2e8f0',
+                            background: '#fff',
+                            color: page === 1 ? '#cbd5e1' : '#475569',
+                            fontWeight: 600,
+                            fontSize: 13,
+                            cursor: page === 1 ? 'not-allowed' : 'pointer',
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: 4,
+                            transition: 'all 0.15s ease',
+                            boxShadow: '0 1px 2px rgba(0,0,0,0.02)'
+                        }}
+                        onMouseEnter={e => { if (page > 1) { e.currentTarget.style.borderColor = '#f97316'; e.currentTarget.style.color = '#f97316'; } }}
+                        onMouseLeave={e => { e.currentTarget.style.borderColor = '#e2e8f0'; e.currentTarget.style.color = page === 1 ? '#cbd5e1' : '#475569'; }}
+                    >
+                        <ChevronLeft style={{ width: 14, height: 14 }} /> Trước
+                    </button>
+
+                    {/* Page Numbers */}
+                    {pages.map((p) => {
+                        const isCurrent = p === page;
+                        return (
+                            <button
+                                key={p}
+                                type="button"
+                                onClick={() => handlePageChange(p)}
+                                style={{
+                                    width: 38,
+                                    height: 38,
+                                    borderRadius: 10,
+                                    border: isCurrent ? '1px solid #f97316' : '1px solid #e2e8f0',
+                                    background: isCurrent ? '#f97316' : '#fff',
+                                    color: isCurrent ? '#fff' : '#475569',
+                                    fontWeight: 700,
+                                    fontSize: 13,
+                                    cursor: 'pointer',
+                                    transition: 'all 0.15s ease',
+                                    boxShadow: '0 1px 2px rgba(0,0,0,0.02)'
+                                }}
+                                onMouseEnter={e => { if (!isCurrent) { e.currentTarget.style.borderColor = '#f97316'; e.currentTarget.style.color = '#f97316'; } }}
+                                onMouseLeave={e => { if (!isCurrent) { e.currentTarget.style.borderColor = '#e2e8f0'; e.currentTarget.style.color = '#475569'; } }}
+                            >
+                                {p}
+                            </button>
+                        );
+                    })}
+
+                    {/* Next Button */}
+                    <button
+                        type="button"
+                        onClick={() => handlePageChange(page + 1)}
+                        disabled={page === totalPages}
+                        style={{
+                            height: 38,
+                            padding: '0 14px',
+                            borderRadius: 10,
+                            border: '1px solid #e2e8f0',
+                            background: '#fff',
+                            color: page === totalPages ? '#cbd5e1' : '#475569',
+                            fontWeight: 600,
+                            fontSize: 13,
+                            cursor: page === totalPages ? 'not-allowed' : 'pointer',
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: 4,
+                            transition: 'all 0.15s ease',
+                            boxShadow: '0 1px 2px rgba(0,0,0,0.02)'
+                        }}
+                        onMouseEnter={e => { if (page < totalPages) { e.currentTarget.style.borderColor = '#f97316'; e.currentTarget.style.color = '#f97316'; } }}
+                        onMouseLeave={e => { e.currentTarget.style.borderColor = '#e2e8f0'; e.currentTarget.style.color = page === totalPages ? '#cbd5e1' : '#475569'; }}
+                    >
+                        Sau <ChevronRight style={{ width: 14, height: 14 }} />
+                    </button>
+                </div>
+                <div style={{ fontSize: 12, color: '#64748b', fontWeight: 500 }}>
+                    Hiển thị {Math.min((page - 1) * LIMIT + 1, total)} - {Math.min(page * LIMIT, total)} trong số {total} sản phẩm
+                </div>
+            </div>
+        );
     };
 
     return (
@@ -191,6 +285,7 @@ const Products = () => {
                                         setSort(e.target.value);
                                         const params = new URLSearchParams(searchParams);
                                         params.set('sort', e.target.value);
+                                        params.set('page', '1');
                                         setSearchParams(params);
                                     }}
                                     className="form-select text-sm"
@@ -206,29 +301,20 @@ const Products = () => {
 
                         {loading ? (
                             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-                                {[1, 2, 3, 4].map(i => (
+                                {[1, 2, 3, 4, 5, 6, 7, 8].map(i => (
                                     <div key={i} className="animate-pulse bg-white/60 rounded-2xl h-80 border border-slate-200"></div>
                                 ))}
                             </div>
                         ) : products.length > 0 ? (
                             <>
                                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-                                    {products.map((product, index) => {
-                                        const isLast = products.length === index + 1;
-                                        return isLast ? (
-                                            <div ref={lastProductElementRef} key={product.id}>
-                                                <ProductCard product={product} />
-                                            </div>
-                                        ) : (
-                                            <ProductCard key={product.id} product={product} />
-                                        );
-                                    })}
+                                    {products.map((product) => (
+                                        <ProductCard key={product.id} product={product} />
+                                    ))}
                                 </div>
-                                {loadingMore && (
-                                    <div className="flex justify-center mt-8">
-                                        <Loader2 className="w-8 h-8 animate-spin text-amber-600" />
-                                    </div>
-                                )}
+
+                                {/* Render Pagination Controls */}
+                                {renderPagination()}
                             </>
                         ) : (
                             <div className="surface rounded-3xl p-12 flex flex-col items-center justify-center text-center">

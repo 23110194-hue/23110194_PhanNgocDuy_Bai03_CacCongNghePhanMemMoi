@@ -25,7 +25,7 @@ const VendorFavorites = () => {
 
     const productMap = useMemo(() => {
         const map = new Map();
-        products.forEach((item) => map.set(item.id, item.title));
+        products.forEach((item) => map.set(item.id, item));
         return map;
     }, [products]);
 
@@ -115,16 +115,36 @@ const VendorFavorites = () => {
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    {favorites.map((item, i) => (
-                                        <tr key={item._id} style={{ borderBottom: i < favorites.length - 1 ? '1px solid #f3f4f6' : 'none' }}>
-                                            <td style={{ padding: '11px 16px', fontWeight: 600, color: '#111' }}>{productMap.get(item._id) || item._id}</td>
-                                            <td style={{ padding: '11px 16px' }}>
-                                                <span style={{ fontSize: 12, fontWeight: 700, padding: '3px 10px', borderRadius: 20, background: '#fff7ed', color: '#f97316', border: '1px solid #fed7aa' }}>
-                                                    ❤️ {item.count}
-                                                </span>
-                                            </td>
-                                        </tr>
-                                    ))}
+                                    {favorites.map((item, i) => {
+                                        const prod = productMap.get(item._id);
+                                        const prodTitle = prod?.title || item._id;
+                                        const prodImg = prod?.images?.[0];
+                                        return (
+                                            <tr key={item._id} style={{ borderBottom: i < favorites.length - 1 ? '1px solid #f3f4f6' : 'none' }}>
+                                                <td style={{ padding: '12px 16px', maxWidth: 300 }}>
+                                                    <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+                                                        <div style={{ width: 36, height: 48, borderRadius: 4, overflow: 'hidden', border: '1px solid #e5e7eb', background: '#f9fafb', flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                                                            {prodImg ? (
+                                                                <img src={prodImg} alt={prodTitle} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                                                            ) : (
+                                                                <Package style={{ width: 14, height: 14, color: '#9ca3af' }} />
+                                                            )}
+                                                        </div>
+                                                        <div style={{ minWidth: 0 }}>
+                                                            <div style={{ fontWeight: 700, color: '#111', fontSize: 13, textOverflow: 'ellipsis', overflow: 'hidden', whiteSpace: 'nowrap', maxWidth: 220 }} title={prodTitle}>
+                                                                {prodTitle}
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </td>
+                                                <td style={{ padding: '12px 16px', verticalAlign: 'middle' }}>
+                                                    <span style={{ fontSize: 11, fontWeight: 700, padding: '4px 12px', borderRadius: 20, background: '#fef2f2', color: '#ef4444', border: '1px solid #fecaca', display: 'inline-flex', alignItems: 'center', gap: 4 }}>
+                                                        ❤️ {item.count}
+                                                    </span>
+                                                </td>
+                                            </tr>
+                                        );
+                                    })}
                                 </tbody>
                             </table>
                         </div>

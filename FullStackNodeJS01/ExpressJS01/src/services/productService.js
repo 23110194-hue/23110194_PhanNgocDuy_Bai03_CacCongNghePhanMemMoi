@@ -154,29 +154,23 @@ const getHomepageData = async (query) => {
 };
 
 const getProductDetailData = async (slug) => {
-    const decorated = await getDecoratedProducts({ isActive: true });
-    const product = decorated.find((item) => item.slug === slug);
+    // Dùng query trực tiếp thay vì load toàn bộ products vào memory
+    const product = await getDecoratedProductBySlug(slug);
     if (!product) {
         return { product: null, similarProducts: [] };
     }
 
-    // Lookup Shop information if shopId exists
-    if (product.shopId) {
-        const Shop = require('../models/shop');
-        const shopInfo = await Shop.findById(product.shopId).lean();
-        if (shopInfo) {
-            product.shopName = shopInfo.name;
-            product.shopSlug = shopInfo.slug;
-        }
-    }
+    const similarProducts = await getDecoratedProducts({
+        isActive: true,
+        category: product.category,
+        slug: { $ne: product.slug },
+    });
 
-    const similarProducts = decorated
-        .filter((item) => item.category === product.category && item.slug !== product.slug)
-        .slice()
+    const sorted = similarProducts
         .sort((a, b) => b.sold - a.sold)
         .slice(0, 4);
 
-    return { product, similarProducts };
+    return { product, similarProducts: sorted };
 };
 
 const getFilteredProductsData = async (query) => {
